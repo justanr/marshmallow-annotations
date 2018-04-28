@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('README.rst') as fh:
     long_description = fh.read()
@@ -8,10 +8,13 @@ setup(
     author='Alec Nikolas Reiter',
     author_email='alecreiter@gmail.com',
     version='1.0.0',
-    py_modules=['marshmallow_annotations'],
-    description='Allows declaring marshmallow fields as annotations',
+    packages=find_packages('src', exclude=['test']),
+    package_dir={'': 'src'},
+    package_data={'': ['LICENSE', 'README.rst', 'CHANGELOG']},
+    include_package_data=True,
+    description='Marrying marshmallow and annotations',
     long_description=long_description,
-    install_requires=['marshmallow'],
+    install_requires=['marshmallow>=2.0.0,<3.0.0'],
     license='MIT',
     zip_safe=False,
     url='https://github.com/justanr/marshmallow-annotations',

@@ -1,0 +1,22 @@
+language: python
+sudo: false
+python:
+- '3.6'
+install:
+- pip install -r requirements-travis.txt
+script:
+- tox
+after_success:
+- coverage combine test
+- coveralls
+deploy:
+  provider: pypi
+  user: justanr
+  distributions: sdist bdist_wheel
+  on:
+    tags: true
+    repo: justanr/marshmallow-annotations
+    python: '3.6'
+    branch: master
+  password:
+    secure: QXg3Bdx2fA97mRpChdBomGdm4PC9ftQcNstUIhjADE+wDj8vzHxWOCzXKSeBRKLleP7o35T7ArpGtU/lDORGUdbmwCSJWtYq3jnHLNj0XggUwyDfXaJai61dDBcD+8H4rJN6L19RVIRRRoZBEgAhR5mII/Qc9xi1wcRULWjquyGdGtUsJprM17IvjSnYYq+i7E3L/tK1MBfFxrhuaHHtc7ql77le7Te2RSJf+iSdTW+Y1TiiPta9qQvo6SenvoZ8RwVDWzvBYrz+Va8cZPlb7M1l3uAb1uluqx4m9iI4Kw9sMbL79iLQS/Wr8XfUpqISjQNuMpNQdcxzoUX0VwOgHzbygXbXZIYPufc6Qeg33dSy2HDK502N3MYJ/g43A1FS3DhunW4JscNhnKFpi01tVkPQ8+EVCTuqFRGEJjRk9BNwaC7z3s4TeeFotbN5rZ3Ns0wdNC5C+0wqOH+saQEaSKvKRLa8JdbwoJr8TzDatf3szAqgrylTKVzoq0cO8uc10Cl9ljLZArNHnj3x7vu2NKeaGC07tlvUmc+5psbhEjC2gFp6p1sbrE2zDCeHJmeT9HHJV2OtMZ0n+kcFfBP8eE4qaOGs4dFsXvZ2dg4dqCqd+Vc8U6eVOCxQ0j1IOpN2x2+3zMufnUdiGd8pEdkAjQK/bgMz1Fr12/eqQQo/VzA=

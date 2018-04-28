@@ -1,0 +1,4 @@
+include README.rst CHANGELOG LICENSE
+recursive-exclude test *
+global-exclude __pycache__
+global-exclude *.py[co]
