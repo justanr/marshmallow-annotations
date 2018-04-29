@@ -14,18 +14,18 @@ class AbstractConverter(ABC):
 
     @abstractmethod
     def convert_with_options(
-            self, name: str, typehint: type, kwargs: Options
+        self, name: str, typehint: type, kwargs: Options
     ) -> FieldABC:
         pass
 
     @abstractmethod
-    def convert_all(self, target: type, ignore: Set[str]=frozenset([])
-                    ) -> Dict[str, FieldABC]:
+    def convert_all(
+        self, target: type, ignore: Set[str] = frozenset([])
+    ) -> Dict[str, FieldABC]:
         pass
 
 
-FieldConstructor = Callable[[AbstractConverter, Tuple[type], Dict[str, Any]],
-                            FieldABC]
+FieldConstructor = Callable[[AbstractConverter, Tuple[type], Dict[str, Any]], FieldABC]
 
 
 class TypeRegistry(ABC):
@@ -48,6 +48,6 @@ class TypeRegistry(ABC):
 
     @abstractmethod
     def register_scheme_constructor(
-            self, type: type, scheme_or_name: Union[str, SchemaABC]
+        self, type: type, scheme_or_name: Union[str, SchemaABC]
     ):
         pass

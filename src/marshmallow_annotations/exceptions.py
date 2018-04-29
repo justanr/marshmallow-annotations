@@ -7,4 +7,3 @@ class MarshmallowAnnotationError(MarshmallowError):
 
 class AnnotationConversionError(MarshmallowAnnotationError):
     pass
-

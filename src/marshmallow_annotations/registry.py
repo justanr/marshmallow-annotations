@@ -12,8 +12,7 @@ from .base import AbstractConverter, FieldConstructor, Options, TypeRegistry
 
 def default_field_constructor(field: FieldABC) -> FieldConstructor:
 
-    def _(converter: AbstractConverter, subtypes: Tuple[type],
-          k: Options) -> FieldABC:
+    def _(converter: AbstractConverter, subtypes: Tuple[type], k: Options) -> FieldABC:
         return field(**k)
 
     _.__name__ = f"{field.__name__}FieldConstructor"
@@ -22,8 +21,7 @@ def default_field_constructor(field: FieldABC) -> FieldConstructor:
 
 def default_scheme_constructor(scheme_name: str) -> FieldConstructor:
 
-    def _(converter: AbstractConverter, subtypes: Tuple[type],
-          k: Options) -> FieldABC:
+    def _(converter: AbstractConverter, subtypes: Tuple[type], k: Options) -> FieldABC:
         return fields.Nested(scheme_name, **k)
 
     _.__name__ = f"{scheme_name}FieldConstructor"
@@ -31,7 +29,7 @@ def default_scheme_constructor(scheme_name: str) -> FieldConstructor:
 
 
 def _list_converter(
-        converter: AbstractConverter, subtypes: Tuple[type], k: Options
+    converter: AbstractConverter, subtypes: Tuple[type], k: Options
 ) -> FieldABC:
     return fields.List(converter.convert(subtypes[0]), **k)
 
@@ -49,13 +47,13 @@ class DefaultTypeRegistry:
             str: fields.String,
             time: fields.Time,
             timedelta: fields.TimeDelta,
-            UUID: fields.UUID
+            UUID: fields.UUID,
         }.items()
     }
 
     _registry[List] = _list_converter
 
-    def __init__(self, registry: Dict[str, FieldConstructor]=None) -> None:
+    def __init__(self, registry: Dict[str, FieldConstructor] = None) -> None:
         if registry is None:
             registry = {}
 
@@ -75,16 +73,14 @@ class DefaultTypeRegistry:
     def get(self, type: type) -> FieldConstructor:
         converter = self._registry.get(type)
         if converter is None:
-            raise AnnotationConversionError(
-                f'No field factory found for {type!r}'
-            )
+            raise AnnotationConversionError(f"No field factory found for {type!r}")
         return converter
 
     def register_field_for_type(self, type: type, field: FieldABC) -> None:
         self.register(type, default_field_constructor(field))
 
     def register_scheme_constructor(
-            self, type: type, scheme_or_name: Union[str, SchemaABC]
+        self, type: type, scheme_or_name: Union[str, SchemaABC]
     ):
         self.register(type, default_scheme_constructor(scheme_or_name))
 

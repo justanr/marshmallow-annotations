@@ -15,9 +15,13 @@ _UNION_TYPE = type(Union)
 def _is_optional(typehint):
     # only supports single type optionals/unions
     # as for the implementation... look, don't ask me
-    return _UNION_TYPE in type(typehint).__mro__ and len(
-        typehint.__args__
-    ) == 2 and typehint.__args__[1] is NoneType
+    return all(
+        [
+            _UNION_TYPE in type(typehint).__mro__,
+            len(typehint.__args__) == 2,
+            typehint.__args__[1] is NoneType,
+        ]
+    )
 
 
 def _is_class_var(typehint):
@@ -33,7 +37,7 @@ def should_include(typehint):
 
 class BaseConverter:
 
-    def __init__(self, scheme, *, registry: TypeRegistry=registry) -> None:
+    def __init__(self, scheme, *, registry: TypeRegistry = registry) -> None:
         self.registry = TypeRegistry
         self.scheme = scheme
 
@@ -41,13 +45,14 @@ class BaseConverter:
         return self._field_from_typehint(typehint, k)
 
     def convert_with_options(
-            self, name: str, typehint: type, kwargs: Options
+        self, name: str, typehint: type, kwargs: Options
     ) -> fields.FieldABC:
         opts = {**self._get_meta_options(name), **kwargs}
         return self._field_from_typehint(typehint, opts)
 
-    def convert_all(self, target: type, ignore: Set[str]=frozenset([])
-                    ) -> Dict[str, fields.FieldABC]:
+    def convert_all(
+        self, target: type, ignore: Set[str] = frozenset([])
+    ) -> Dict[str, fields.FieldABC]:
         return {
             k: self.convert_with_options(k, v)
             for k, v in self._get_type_hints(target).items()
@@ -67,13 +72,13 @@ class BaseConverter:
             typehint = typehint.__args__[0]
 
         # set this after optional check
-        subtypes = getattr(typehint, '__args__', ())
+        subtypes = getattr(typehint, "__args__", ())
 
         if subtypes != ():
             typehint = typehint.__base__
 
-        kwargs.setdefault('allow_none', allow_none)
-        kwargs.setdefault('required', required)
+        kwargs.setdefault("allow_none", allow_none)
+        kwargs.setdefault("required", required)
 
         field_constructor = self.registry.from_type(typehint)
         return field_constructor(self, subtypes, kwargs)
@@ -90,15 +95,15 @@ class BaseConverter:
 
     def _visit_parent_metas(self, f):
         for parent in self.scheme.__mro__:
-            meta = getattr(parent, 'Meta', None)
+            meta = getattr(parent, "Meta", None)
             if meta is not None:
                 result = f(meta)
                 if result:
                     return result
 
+
     def _get_type_hints(self, item):
         hints = {}
-
         for parent in item.__mro__[::-1]:
             hints.update(get_type_hints(parent))
         return hints
