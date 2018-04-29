@@ -39,7 +39,7 @@ def _list_converter(
     return fields.List(converter.convert(subtypes[0]), **k)
 
 
-class DefaultTypeRegistry:
+class DefaultTypeRegistry(TypeRegistry):
     _registry = {
         k: default_field_constructor(v)
         for k, v in {
@@ -58,7 +58,7 @@ class DefaultTypeRegistry:
 
     _registry[List] = _list_converter
 
-    def __init__(self, registry: Dict[str, FieldConstructor] = None) -> None:
+    def __init__(self, registry: Dict[type, FieldConstructor] = None) -> None:
         if registry is None:
             registry = {}
 
@@ -67,9 +67,11 @@ class DefaultTypeRegistry:
     def register(self, target: type, constructor: FieldConstructor) -> None:
         self._registry[target] = constructor
 
-    def field_constructor(self, target: type) -> FieldConstructor:
+    def field_constructor(
+        self, target: type
+    ) -> Callable[[FieldConstructor], FieldConstructor]:
 
-        def field_constructor(constructor):
+        def field_constructor(constructor: FieldConstructor) -> FieldConstructor:
             self.register(target, constructor)
             return constructor
 

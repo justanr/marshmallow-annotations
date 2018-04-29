@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Optional, Set, Tuple, Union
+from typing import AbstractSet, Any, Callable, Dict, Optional, Tuple, Union
 
 from marshmallow.base import FieldABC, SchemaABC
 
@@ -20,7 +20,7 @@ class AbstractConverter(ABC):
     def convert_all(
         self,
         target: type,
-        ignore: Set[str] = frozenset([]),
+        ignore: AbstractSet[str] = frozenset([]),
         configs: NamedConfigs = None,
     ) -> GeneratedFields:
         pass

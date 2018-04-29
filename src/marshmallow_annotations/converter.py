@@ -1,6 +1,7 @@
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Any, Dict, Optional, Set, Union, _ClassVar, get_type_hints
+from typing import _ClassVar  # type: ignore
+from typing import AbstractSet, Any, Dict, Optional, Union, get_type_hints
 
 from marshmallow import fields
 
@@ -39,7 +40,7 @@ def should_include(typehint):
     return not _is_class_var(typehint)
 
 
-class BaseConverter:
+class BaseConverter(AbstractConverter):
 
     def __init__(self, *, registry: TypeRegistry = registry) -> None:
         self.registry = registry
@@ -51,7 +52,7 @@ class BaseConverter:
     def convert_all(
         self,
         target: type,
-        ignore: Set[str] = frozenset([]),
+        ignore: AbstractSet[str] = frozenset([]),
         configs: NamedConfigs = None,
     ) -> GeneratedFields:
         configs = configs if configs is not None else {}

@@ -1,15 +1,15 @@
-import typing
+import typing as t
 from uuid import UUID
 
+import pytest
 from marshmallow import fields
-
 from marshmallow_annotations.converter import BaseConverter
 from marshmallow_annotations.scheme import AnnotationSchema
 
 
 class SomeTypeThing:
     id: UUID
-    name: typing.Optional[str]
+    name: t.Optional[str]
 
 
 def test_autogenerates_fields():
@@ -92,6 +92,7 @@ def test_pulls_configuration_from_parent():
 
 
 def test_merges_configuration_with_parents():
+
     class SomeTypeThingScheme(AnnotationSchema):
 
         class Meta:
@@ -108,8 +109,8 @@ def test_merges_configuration_with_parents():
                 id = {"default": 1}
                 name = {"dump_only": True}
 
-    name_field = SomeTypeThingSchemeJr._declared_fields['name']
-    id_field = SomeTypeThingSchemeJr._declared_fields['id']
+    name_field = SomeTypeThingSchemeJr._declared_fields["name"]
+    id_field = SomeTypeThingSchemeJr._declared_fields["id"]
 
     assert name_field.default == "it wasn't there"
     assert name_field.dump_only
@@ -168,3 +169,29 @@ def test_uses_parent_converter_if_none_present_here():
 
     assert isinstance(SomeTypeThingSchemeJr.opts.converter, TattleConverter)
     assert SomeTypeThingSchemeJr.opts.converter.called
+
+
+@pytest.mark.xfail(strict=True)
+def test_forward_declaration_of_scheme_target():
+
+    class SomeType:
+        children: t.List["SomeType"]
+        id: int
+
+        def __init__(self, id, children: t.Optional[t.List["SomeType"]] = None) -> None:
+            self.id = id
+            if children is None:
+                children = []
+            self.children = children
+
+    class SomeTypeScheme(AnnotationSchema):
+
+        class Meta:
+            target = SomeType
+
+    s = SomeTypeScheme()
+    result = s.dump(SomeType(id=1, children=[SomeType(id=2)]))
+
+    expected = {"id": 1, "children": [{"id": 2, "children": []}]}
+    assert not result.errors
+    assert result.data == expected
