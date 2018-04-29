@@ -34,7 +34,7 @@ def test_pulls_settings_from_meta():
         class Meta:
             target = SomeTypeThing
 
-            class Defaults:
+            class Fields:
                 name = {"default": "it wasn't there"}
 
     name_field = SomeTypeThingScheme._declared_fields["name"]
@@ -76,7 +76,7 @@ def test_pulls_configuration_from_parent():
 
         class Meta:
 
-            class Defaults:
+            class Fields:
                 name = {"default": "it wasn't there"}
 
     class SomeTypeThingSchemeJr(SomeTypeThingScheme):
@@ -97,7 +97,7 @@ def test_merges_configuration_with_parents():
 
         class Meta:
 
-            class Defaults:
+            class Fields:
                 name = {"default": "it wasn't there"}
 
     class SomeTypeThingSchemeJr(SomeTypeThingScheme):
@@ -105,7 +105,7 @@ def test_merges_configuration_with_parents():
         class Meta:
             target = SomeTypeThing
 
-            class Defaults:
+            class Fields:
                 id = {"default": 1}
                 name = {"dump_only": True}
 

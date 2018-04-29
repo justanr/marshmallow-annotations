@@ -60,7 +60,7 @@ class AnnotationSchemaOpts(SchemaOpts):
 
         self._extract_from_parents(schema, merge_field_configs)
 
-        defaults = getattr(meta, 'Defaults', self.__sentinel)
+        defaults = getattr(meta, 'Fields', self.__sentinel)
         if defaults is self.__sentinel:
             return
 
