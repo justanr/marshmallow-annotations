@@ -21,7 +21,7 @@ class AnnotationSchemaMeta(SchemaMeta):
 
         meta = getattr(klass, "Meta", None)
 
-        if not meta:
+        if not meta:  # pragma: no branch
             return fields
 
         target = getattr(meta, "target", None)
@@ -43,7 +43,7 @@ class AnnotationSchemaMeta(SchemaMeta):
 
     @classmethod
     def _register_as_scheme_for_target(cls, meta):
-        if meta is None:
+        if meta is None:  # pragma: no branch
             return
 
         should_register = getattr(meta, "register_as_scheme", False)

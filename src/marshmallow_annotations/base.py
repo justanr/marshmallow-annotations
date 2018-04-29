@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Set, Tuple, Union
+from .exceptions import MarshmallowAnnotationError
 
 from marshmallow.base import FieldABC, SchemaABC
 
@@ -35,7 +36,9 @@ class TypeRegistry(ABC):
         pass
 
     @abstractmethod
-    def field_constructor(self, type: type) -> FieldConstructor:
+    def field_constructor(
+        self, type: type
+    ) -> Callable[[FieldConstructor], FieldConstructor]:
         pass
 
     @abstractmethod
@@ -51,3 +54,11 @@ class TypeRegistry(ABC):
         self, type: type, scheme_or_name: Union[str, SchemaABC]
     ):
         pass
+
+    # ideally this is never used and custom implementations provide their
+    # contains implementation as well
+    def __contains__(self, target: type) -> bool:  # pragma: no cover
+        try:
+            return bool(self.get(target))
+        except MarshmallowAnnotationError:
+            return False

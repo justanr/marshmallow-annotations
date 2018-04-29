@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Callable, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 from uuid import UUID
 
 from marshmallow import fields
 from marshmallow.base import FieldABC, SchemaABC
 
 from .base import AbstractConverter, FieldConstructor, Options, TypeRegistry
+from .exceptions import AnnotationConversionError
 
 
 def default_field_constructor(field: FieldABC) -> FieldConstructor:
@@ -60,29 +61,31 @@ class DefaultTypeRegistry:
         self._registry = {**self._registry, **registry}
 
     def register(self, target: type, constructor: FieldConstructor) -> None:
-        self._registry[type] = field_constructor
+        self._registry[target] = constructor
 
-    def field_constructor(self, type: type) -> FieldConstructor:
+    def field_constructor(self, target: type) -> FieldConstructor:
 
         def field_constructor(constructor):
-            self.register(type, constructor)
+            self.register(target, constructor)
             return constructor
 
         return field_constructor
 
-    def get(self, type: type) -> FieldConstructor:
-        converter = self._registry.get(type)
+    def get(self, target: type) -> FieldConstructor:
+        converter = self._registry.get(target)
         if converter is None:
-            raise AnnotationConversionError(f"No field factory found for {type!r}")
+            raise AnnotationConversionError(f"No field factory found for {target!r}")
         return converter
 
-    def register_field_for_type(self, type: type, field: FieldABC) -> None:
-        self.register(type, default_field_constructor(field))
+    def register_field_for_type(self, target: type, field: FieldABC) -> None:
+        self.register(target, default_field_constructor(field))
 
     def register_scheme_constructor(
-        self, type: type, scheme_or_name: Union[str, SchemaABC]
+        self, target: type, scheme_or_name: Union[str, SchemaABC]
     ):
-        self.register(type, default_scheme_constructor(scheme_or_name))
+        self.register(target, default_scheme_constructor(scheme_or_name))
 
+    def __contains__(self, target: type) -> bool:
+        return target in self._registry
 
 registry = DefaultTypeRegistry()

@@ -15,19 +15,17 @@ _UNION_TYPE = type(Union)
 def _is_optional(typehint):
     # only supports single type optionals/unions
     # as for the implementation... look, don't ask me
-    return all(
-        [
-            _UNION_TYPE in type(typehint).__mro__,
-            len(typehint.__args__) == 2,
-            typehint.__args__[1] is NoneType,
-        ]
+    return (
+        _UNION_TYPE in type(typehint).__mro__
+        and len(typehint.__args__) == 2
+        and typehint.__args__[1] is NoneType
     )
 
 
 def _is_class_var(typehint):
     try:
         return isinstance(typehint, _ClassVar)
-    except:
+    except:  # pragma: no branch
         return False
 
 
@@ -38,7 +36,7 @@ def should_include(typehint):
 class BaseConverter:
 
     def __init__(self, scheme, *, registry: TypeRegistry = registry) -> None:
-        self.registry = TypeRegistry
+        self.registry = registry
         self.scheme = scheme
 
     def convert(self, typehint: type, **k: Options) -> fields.FieldABC:
@@ -54,7 +52,7 @@ class BaseConverter:
         self, target: type, ignore: Set[str] = frozenset([])
     ) -> Dict[str, fields.FieldABC]:
         return {
-            k: self.convert_with_options(k, v)
+            k: self.convert_with_options(k, v, {})
             for k, v in self._get_type_hints(target).items()
             if k not in ignore and should_include(v)
         }
@@ -80,11 +78,11 @@ class BaseConverter:
         kwargs.setdefault("allow_none", allow_none)
         kwargs.setdefault("required", required)
 
-        field_constructor = self.registry.from_type(typehint)
+        field_constructor = self.registry.get(typehint)
         return field_constructor(self, subtypes, kwargs)
 
     def _get_meta_options(self, name):
-        if self.scheme is None:
+        if self.scheme is None:  # pragma: no branch
             return {}
 
         parent_meta_options = self._visit_parent_metas(
@@ -100,7 +98,6 @@ class BaseConverter:
                 result = f(meta)
                 if result:
                     return result
-
 
     def _get_type_hints(self, item):
         hints = {}
