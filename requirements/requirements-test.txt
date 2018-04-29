@@ -1,7 +1,7 @@
 -rrequirements-cov.txt
+-rrequirements-types.txt
 flake8==3.5.0
 flake8-bugbear==18.2.0
-mypy==0.590
 pytest==3.5.0
 pytest-flake8==1.0.0
 pytest-mypy==0.3.1
