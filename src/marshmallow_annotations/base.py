@@ -1,28 +1,28 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Set, Tuple, Union
-from .exceptions import MarshmallowAnnotationError
+from typing import Any, Callable, Dict, Optional, Set, Tuple, Union
 
 from marshmallow.base import FieldABC, SchemaABC
 
-Options = Dict[str, Any]
+from .exceptions import MarshmallowAnnotationError
+
+ConfigOptions = Optional[Dict[str, Any]]
+NamedConfigs = Optional[Dict[str, ConfigOptions]]
+GeneratedFields = Dict[str, FieldABC]
 
 
 class AbstractConverter(ABC):
 
     @abstractmethod
-    def convert(self, typehint: type, **k: Options) -> FieldABC:
-        pass
-
-    @abstractmethod
-    def convert_with_options(
-        self, name: str, typehint: type, kwargs: Options
-    ) -> FieldABC:
+    def convert(self, typehint: type, opts: ConfigOptions = None) -> FieldABC:
         pass
 
     @abstractmethod
     def convert_all(
-        self, target: type, ignore: Set[str] = frozenset([])
-    ) -> Dict[str, FieldABC]:
+        self,
+        target: type,
+        ignore: Set[str] = frozenset([]),
+        configs: NamedConfigs = None,
+    ) -> GeneratedFields:
         pass
 
 

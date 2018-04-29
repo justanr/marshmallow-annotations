@@ -7,13 +7,15 @@ from uuid import UUID
 from marshmallow import fields
 from marshmallow.base import FieldABC, SchemaABC
 
-from .base import AbstractConverter, FieldConstructor, Options, TypeRegistry
+from .base import AbstractConverter, ConfigOptions, FieldConstructor, TypeRegistry
 from .exceptions import AnnotationConversionError
 
 
 def default_field_constructor(field: FieldABC) -> FieldConstructor:
 
-    def _(converter: AbstractConverter, subtypes: Tuple[type], k: Options) -> FieldABC:
+    def _(
+        converter: AbstractConverter, subtypes: Tuple[type], k: ConfigOptions
+    ) -> FieldABC:
         return field(**k)
 
     _.__name__ = f"{field.__name__}FieldConstructor"
@@ -22,7 +24,9 @@ def default_field_constructor(field: FieldABC) -> FieldConstructor:
 
 def default_scheme_constructor(scheme_name: str) -> FieldConstructor:
 
-    def _(converter: AbstractConverter, subtypes: Tuple[type], k: Options) -> FieldABC:
+    def _(
+        converter: AbstractConverter, subtypes: Tuple[type], k: ConfigOptions
+    ) -> FieldABC:
         return fields.Nested(scheme_name, **k)
 
     _.__name__ = f"{scheme_name}FieldConstructor"
@@ -30,7 +34,7 @@ def default_scheme_constructor(scheme_name: str) -> FieldConstructor:
 
 
 def _list_converter(
-    converter: AbstractConverter, subtypes: Tuple[type], k: Options
+    converter: AbstractConverter, subtypes: Tuple[type], k: ConfigOptions
 ) -> FieldABC:
     return fields.List(converter.convert(subtypes[0]), **k)
 
@@ -87,5 +91,4 @@ class DefaultTypeRegistry:
 
     def __contains__(self, target: type) -> bool:
         return target in self._registry
-
 registry = DefaultTypeRegistry()

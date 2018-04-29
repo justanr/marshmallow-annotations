@@ -3,8 +3,8 @@ from uuid import UUID
 
 from marshmallow import fields
 
-from marshmallow_annotations.scheme import AnnotationSchema
 from marshmallow_annotations.converter import BaseConverter
+from marshmallow_annotations.scheme import AnnotationSchema
 
 
 class SomeTypeThing:
@@ -33,7 +33,9 @@ def test_pulls_settings_from_meta():
 
         class Meta:
             target = SomeTypeThing
-            name = {"default": "it wasn't there"}
+
+            class Defaults:
+                name = {"default": "it wasn't there"}
 
     name_field = SomeTypeThingScheme._declared_fields["name"]
 
@@ -73,7 +75,9 @@ def test_pulls_configuration_from_parent():
     class SomeTypeThingScheme(AnnotationSchema):
 
         class Meta:
-            name = {"default": "it wasn't there"}
+
+            class Defaults:
+                name = {"default": "it wasn't there"}
 
     class SomeTypeThingSchemeJr(SomeTypeThingScheme):
 
@@ -82,30 +86,85 @@ def test_pulls_configuration_from_parent():
 
     name_field = SomeTypeThingSchemeJr._declared_fields["name"]
 
+    assert (
+        name_field.default == "it wasn't there"
+    ), SomeTypeThingSchemeJr.opts.field_configs
+
+
+def test_merges_configuration_with_parents():
+    class SomeTypeThingScheme(AnnotationSchema):
+
+        class Meta:
+
+            class Defaults:
+                name = {"default": "it wasn't there"}
+
+    class SomeTypeThingSchemeJr(SomeTypeThingScheme):
+
+        class Meta:
+            target = SomeTypeThing
+
+            class Defaults:
+                id = {"default": 1}
+                name = {"dump_only": True}
+
+    name_field = SomeTypeThingSchemeJr._declared_fields['name']
+    id_field = SomeTypeThingSchemeJr._declared_fields['id']
+
     assert name_field.default == "it wasn't there"
+    assert name_field.dump_only
+    assert id_field.default == 1
 
 
 def test_can_use_custom_converter():
+
     class TattleConverter(BaseConverter):
-        def convert_all(self, target, ignore=frozenset()):  # noqa: B008
+
+        def convert_all(self, target, ignore=frozenset(), configs=None):  # noqa: B008
             self.called = True
-            return super().convert_all(target, ignore)
+            return super().convert_all(target, ignore, configs)
 
     class SomeTypeThingScheme(AnnotationSchema):
+
         class Meta:
-            converter = TattleConverter
+            converter_factory = TattleConverter
             target = SomeTypeThing
 
-    assert SomeTypeThingScheme.Meta.converter.called
+    assert SomeTypeThingScheme.opts.converter.called
 
 
 def test_registers_schema_as_field_for_target_type(registry):
     assert SomeTypeThing not in registry
 
+    passed_registry = registry
+
     class SomeTypeThingScheme(AnnotationSchema):
+
         class Meta:
             target = SomeTypeThing
-            converter = lambda scheme: BaseConverter(scheme, registry=registry)
+            converter_factory = BaseConverter
             register_as_scheme = True
+            registry = passed_registry
 
     assert SomeTypeThing in registry
+
+
+def test_uses_parent_converter_if_none_present_here():
+
+    class TattleConverter(BaseConverter):
+
+        def convert_all(self, target, ignore=frozenset(), configs=None):  # noqa: B008
+            self.called = True
+            return super().convert_all(target, ignore, configs)
+
+    class SomeTypeThingScheme(AnnotationSchema):
+
+        class Meta:
+            converter_factory = TattleConverter
+            target = SomeTypeThing
+
+    class SomeTypeThingSchemeJr(SomeTypeThingScheme):
+        pass
+
+    assert isinstance(SomeTypeThingSchemeJr.opts.converter, TattleConverter)
+    assert SomeTypeThingSchemeJr.opts.converter.called

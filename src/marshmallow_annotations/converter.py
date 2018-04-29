@@ -1,10 +1,16 @@
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Dict, Set, Union, _ClassVar, get_type_hints
+from typing import Any, Dict, Optional, Set, Union, _ClassVar, get_type_hints
 
 from marshmallow import fields
 
-from .base import AbstractConverter, Options, TypeRegistry
+from .base import (
+    AbstractConverter,
+    ConfigOptions,
+    GeneratedFields,
+    NamedConfigs,
+    TypeRegistry,
+)
 from .exceptions import AnnotationConversionError, MarshmallowAnnotationError
 from .registry import registry
 
@@ -35,24 +41,22 @@ def should_include(typehint):
 
 class BaseConverter:
 
-    def __init__(self, scheme, *, registry: TypeRegistry = registry) -> None:
+    def __init__(self, *, registry: TypeRegistry = registry) -> None:
         self.registry = registry
-        self.scheme = scheme
 
-    def convert(self, typehint: type, **k: Options) -> fields.FieldABC:
-        return self._field_from_typehint(typehint, k)
-
-    def convert_with_options(
-        self, name: str, typehint: type, kwargs: Options
-    ) -> fields.FieldABC:
-        opts = {**self._get_meta_options(name), **kwargs}
+    def convert(self, typehint: type, opts: ConfigOptions = None) -> fields.FieldABC:
+        opts = opts if opts is not None else {}
         return self._field_from_typehint(typehint, opts)
 
     def convert_all(
-        self, target: type, ignore: Set[str] = frozenset([])
-    ) -> Dict[str, fields.FieldABC]:
+        self,
+        target: type,
+        ignore: Set[str] = frozenset([]),
+        configs: NamedConfigs = None,
+    ) -> GeneratedFields:
+        configs = configs if configs is not None else {}
         return {
-            k: self.convert_with_options(k, v, {})
+            k: self.convert(v, configs.get(k, {}))
             for k, v in self._get_type_hints(target).items()
             if k not in ignore and should_include(v)
         }
@@ -80,24 +84,6 @@ class BaseConverter:
 
         field_constructor = self.registry.get(typehint)
         return field_constructor(self, subtypes, kwargs)
-
-    def _get_meta_options(self, name):
-        if self.scheme is None:  # pragma: no branch
-            return {}
-
-        parent_meta_options = self._visit_parent_metas(
-            lambda meta: getattr(meta, name, None)
-        )
-
-        return parent_meta_options or {}
-
-    def _visit_parent_metas(self, f):
-        for parent in self.scheme.__mro__:
-            meta = getattr(parent, "Meta", None)
-            if meta is not None:
-                result = f(meta)
-                if result:
-                    return result
 
     def _get_type_hints(self, item):
         hints = {}

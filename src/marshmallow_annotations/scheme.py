@@ -1,7 +1,79 @@
-from marshmallow.schema import Schema, SchemaMeta
+from inspect import getmro
+from typing import get_type_hints
+
+from marshmallow.schema import Schema, SchemaMeta, SchemaOpts
 
 from .converter import BaseConverter
-from .registry import TypeRegistry
+from .exceptions import MarshmallowAnnotationError
+from .registry import TypeRegistry, registry
+
+
+class AnnotationSchemaOpts(SchemaOpts):
+
+    def __init__(self, meta, schema=None):
+        super().__init__(meta)
+        self.__sentinel = object()
+        self.field_configs = {}
+
+        self._process(meta, schema)
+        self._finalize()
+        self.converter = self.converter_factory(registry=self.registry)
+        del self.__sentinel
+
+    def _process(self, meta, schema):
+        self._extract_from_parents(schema, self._extract_from)
+        self._extract_from(meta)
+        self._gather_field_configs(schema, meta)
+
+    def _extract_from_parents(self, schema, f):
+        # can't look at just next parent
+        # they may or may be an AnnotationSchema
+        # so we need to walk backwards from object to get the correct
+        # combination of settings
+        for parent in reversed(getmro(schema)):
+            opts = getattr(parent, "opts", self.__sentinel)
+            if opts is self.__sentinel:
+                continue
+
+            f(opts)
+
+    def _extract_from(self, source):
+        if hasattr(source, "converter_factory"):
+            self.converter_factory = source.converter_factory
+        if hasattr(source, "register_as_scheme"):
+            self.register_as_scheme = source.register_as_scheme
+        if hasattr(source, "target"):
+            self.target = source.target
+        if hasattr(source, "registry"):
+            self.registry = source.registry
+
+    def _gather_field_configs(self, schema, meta):
+        def merge_field_configs(opts):
+            field_configs = getattr(opts, 'field_configs', self.__sentinel)
+
+            if field_configs is self.__sentinel:
+                return
+
+            for k, v in field_configs.items():
+                config = self.field_configs.setdefault(k, {})
+                config.update(dict(v))
+
+        self._extract_from_parents(schema, merge_field_configs)
+
+        defaults = getattr(meta, 'Defaults', self.__sentinel)
+        if defaults is self.__sentinel:
+            return
+
+        for k, v in defaults.__dict__.items():
+            if k.startswith('_'):
+                continue
+
+            self.field_configs.setdefault(k, {}).update(v)
+
+    def _finalize(self):
+        self.converter_factory = getattr(self, "converter_factory", BaseConverter)
+        self.register_as_scheme = getattr(self, "register_as_scheme", False)
+        self.registry = getattr(self, "registry", registry)
 
 
 class AnnotationSchemaMeta(SchemaMeta):
@@ -9,8 +81,7 @@ class AnnotationSchemaMeta(SchemaMeta):
     @staticmethod
     def __new__(mcls, name, bases, attrs, **k):
         cls = super().__new__(mcls, name, bases, attrs)
-        meta = getattr(cls, "Meta", None)
-        cls._register_as_scheme_for_target(meta)
+        cls._register_as_scheme_for_target(cls.opts)
         return cls
 
     @classmethod
@@ -19,39 +90,31 @@ class AnnotationSchemaMeta(SchemaMeta):
             klass, cls_fields, inherited_fields, dict_cls
         )
 
-        meta = getattr(klass, "Meta", None)
-
-        if not meta:  # pragma: no branch
-            return fields
-
-        target = getattr(meta, "target", None)
+        target = getattr(klass.opts, "target", None)
 
         if target is None:
             return fields
 
-        converter_factory = getattr(meta, "converter", BaseConverter)
-
-        # weeeee circular references!
-        meta.converter = converter = converter_factory(klass)
+        converter = klass.opts.converter
 
         # ignore anything explicitly declared on this scheme
         # or any parent scheme
         ignore = fields.keys()
-        fields.update(converter.convert_all(target, ignore))
+        fields.update(converter.convert_all(target, ignore, klass.opts.field_configs))
 
         return fields
 
-    @classmethod
-    def _register_as_scheme_for_target(cls, meta):
-        if meta is None:  # pragma: no branch
-            return
+    def _register_as_scheme_for_target(self, opts):
 
-        should_register = getattr(meta, "register_as_scheme", False)
-        target = getattr(meta, "target", None)
+        target = getattr(opts, "target", None)
 
-        if should_register and target:
-            meta.converter.registry.register_scheme_constructor(target, cls)
+        if opts.register_as_scheme and target:
+            opts.converter.registry.register_scheme_constructor(target, self)
 
 
 class AnnotationSchema(Schema, metaclass=AnnotationSchemaMeta):
-    pass
+    OPTIONS_CLASS_TYPE = AnnotationSchemaOpts
+
+    @classmethod
+    def OPTIONS_CLASS(cls, meta):
+        return cls.OPTIONS_CLASS_TYPE(meta, cls)
