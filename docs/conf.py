@@ -42,7 +42,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
-    'sphinx_autodoc_annotation',
+   # 'sphinx_autodoc_annotation',
     'sphinxcontrib_trio',
 ]
 
