@@ -37,21 +37,21 @@ class TypeRegistry(ABC):
 
     @abstractmethod
     def field_constructor(
-        self, type: type
+        self, target: type
     ) -> Callable[[FieldConstructor], FieldConstructor]:
         pass
 
     @abstractmethod
-    def get(self, type: type) -> FieldConstructor:
+    def get(self, target: type) -> FieldConstructor:
         pass
 
     @abstractmethod
-    def register_field_for_type(self, type: type, field: FieldABC) -> None:
+    def register_field_for_type(self, target: type, field: FieldABC) -> None:
         pass
 
     @abstractmethod
     def register_scheme_constructor(
-        self, type: type, scheme_or_name: Union[str, SchemaABC]
+        self, target: type, scheme_or_name: Union[str, SchemaABC]
     ):
         pass
 

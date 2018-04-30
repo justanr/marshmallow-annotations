@@ -72,6 +72,7 @@ class BaseConverter(AbstractConverter):
 
         if _is_optional(typehint):
             allow_none = True
+            required = False
             typehint = typehint.__args__[0]
 
         # set this after optional check

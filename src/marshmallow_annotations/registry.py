@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from typing import Callable, Dict, List, Tuple, Union
@@ -14,9 +13,9 @@ from .exceptions import AnnotationConversionError
 def default_field_constructor(field: FieldABC) -> FieldConstructor:
 
     def _(
-        converter: AbstractConverter, subtypes: Tuple[type], k: ConfigOptions
+        converter: AbstractConverter, subtypes: Tuple[type], opts: ConfigOptions
     ) -> FieldABC:
-        return field(**k)
+        return field(**opts)
 
     _.__name__ = f"{field.__name__}FieldConstructor"
     return _
@@ -25,18 +24,18 @@ def default_field_constructor(field: FieldABC) -> FieldConstructor:
 def default_scheme_constructor(scheme_name: str) -> FieldConstructor:
 
     def _(
-        converter: AbstractConverter, subtypes: Tuple[type], k: ConfigOptions
+        converter: AbstractConverter, subtypes: Tuple[type], opts: ConfigOptions
     ) -> FieldABC:
-        return fields.Nested(scheme_name, **k)
+        return fields.Nested(scheme_name, **opts)
 
     _.__name__ = f"{scheme_name}FieldConstructor"
     return _
 
 
 def _list_converter(
-    converter: AbstractConverter, subtypes: Tuple[type], k: ConfigOptions
+    converter: AbstractConverter, subtypes: Tuple[type], opts: ConfigOptions
 ) -> FieldABC:
-    return fields.List(converter.convert(subtypes[0]), **k)
+    return fields.List(converter.convert(subtypes[0]), **opts)
 
 
 class DefaultTypeRegistry(TypeRegistry):
@@ -88,9 +87,11 @@ class DefaultTypeRegistry(TypeRegistry):
 
     def register_scheme_constructor(
         self, target: type, scheme_or_name: Union[str, SchemaABC]
-    ):
+    ) -> None:
         self.register(target, default_scheme_constructor(scheme_or_name))
 
     def __contains__(self, target: type) -> bool:
         return target in self._registry
+
+
 registry = DefaultTypeRegistry()

@@ -58,7 +58,6 @@ Content
    :maxdepth: 1
 
    quickstart
-   converters
-   customtypes
+   customizing
    api
    changelog
