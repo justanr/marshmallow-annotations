@@ -2,8 +2,8 @@ from .converter import BaseConverter
 from .exceptions import AnnotationConversionError, MarshmallowAnnotationError
 from .registry import (
     TypeRegistry,
-    default_field_constructor,
-    default_scheme_constructor,
+    default_field_factory,
+    default_scheme_factory,
     registry,
 )
 from .schema import AnnotatedSchema, AnnotatedSchemaMeta

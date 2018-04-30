@@ -1,7 +1,5 @@
-from datetime import date, datetime, time, timedelta
-from decimal import Decimal
 from typing import _ClassVar  # type: ignore
-from typing import AbstractSet, Any, Dict, Optional, Union, get_type_hints
+from typing import AbstractSet, Union, get_type_hints
 
 from marshmallow import fields
 
@@ -12,7 +10,6 @@ from .base import (
     NamedConfigs,
     TypeRegistry,
 )
-from .exceptions import AnnotationConversionError, MarshmallowAnnotationError
 from .registry import registry
 
 NoneType = type(None)
@@ -32,7 +29,7 @@ def _is_optional(typehint):
 def _is_class_var(typehint):
     try:
         return isinstance(typehint, _ClassVar)
-    except:  # pragma: no branch
+    except TypeError:  # pragma: no branch
         return False
 
 
@@ -41,6 +38,13 @@ def should_include(typehint):
 
 
 class BaseConverter(AbstractConverter):
+    """
+    Default implementation of :class:`~marshmallow_annotations.base.AbstractConverter`.
+
+    Handles parsing types for type hints and mapping those type hints into
+    marshmallow field instances by way of a
+    :class:`~marshmallow_annotations.base.TypeRegistry` instance.
+    """
 
     def __init__(self, *, registry: TypeRegistry = registry) -> None:
         self.registry = registry
@@ -52,7 +56,7 @@ class BaseConverter(AbstractConverter):
     def convert_all(
         self,
         target: type,
-        ignore: AbstractSet[str] = frozenset([]),
+        ignore: AbstractSet[str] = frozenset([]),  # noqa
         configs: NamedConfigs = None,
     ) -> GeneratedFields:
         configs = configs if configs is not None else {}

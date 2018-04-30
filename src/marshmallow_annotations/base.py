@@ -11,9 +11,30 @@ GeneratedFields = Dict[str, FieldABC]
 
 
 class AbstractConverter(ABC):
+    """
+    Converters handle gathering type hints and consulting with a
+    :class:`~marshmallow_annotations.base.TypeRegistry` in order to produce
+    marshmallow field instances::
+
+
+        from marshmallow_annotations import BaseConverter
+
+        converter = BaseConverter(registry)
+        converter.convert(int, {"required": False})
+        # marshmallow.fields.Integer(...)
+
+
+    This abstract class is provided primarily for type hinting purposes
+    but also allows implementations outside of the default implementation in
+    this library.
+    """
 
     @abstractmethod
     def convert(self, typehint: type, opts: ConfigOptions = None) -> FieldABC:
+        """
+        Used to convert a type hint into a :class:`~marshmallow.base.FieldABC`
+        instance.
+        """
         pass
 
     @abstractmethod
@@ -23,42 +44,115 @@ class AbstractConverter(ABC):
         ignore: AbstractSet[str] = frozenset([]),
         configs: NamedConfigs = None,
     ) -> GeneratedFields:
+        """
+        Used to transform a type with annotations into a dictionary mapping
+        the type's attribute names to :class:`~marshmallow.base.FieldABC`
+        instances.
+        """
         pass
 
 
-FieldConstructor = Callable[[AbstractConverter, Tuple[type], Dict[str, Any]], FieldABC]
+FieldFactory = Callable[[AbstractConverter, Tuple[type], Dict[str, Any]], FieldABC]
 
 
 class TypeRegistry(ABC):
+    """
+    Abstraction representation of a registry mapping Python types to marshmallow
+    field types.
+
+    This abstract class is provided primarily for type hinting purposes but also
+    allows implementations outside of the default implementation in this library.
+    """
+
 
     @abstractmethod
-    def register(self, target: type, constructor: FieldConstructor) -> None:
+    def register(self, target: type, constructor: FieldFactory) -> None:
+        """
+        Registers a raw field factory for the specified type::
+
+            from marshmallow import fields
+
+            def custom(converter, subtypes, opts):
+                return fields.Raw(**opts)
+
+            registry.register(bytes, custom)
+
+
+        """
         pass
 
-    @abstractmethod
-    def field_constructor(
-        self, target: type
-    ) -> Callable[[FieldConstructor], FieldConstructor]:
-        pass
+    def field_factory(self, target: type) -> Callable[[FieldFactory], FieldFactory]:
+        """
+        Decorator form of register::
+
+            @register.field_factor(bytes)
+            def custom(converter, subtypes, opts):
+                return fields.Raw(**opts)
+
+        Returns the original function so it can be used again if needed.
+        """
+
+        def field_factory(constructor: FieldFactory) -> FieldFactory:
+            self.register(target, constructor)
+            return constructor
+
+        return field_factory
 
     @abstractmethod
-    def get(self, target: type) -> FieldConstructor:
+    def get(self, target: type) -> FieldFactory:
+        """
+        Retrieves a field factory from the registry. If it doesn't exist,
+        this may raise a
+        :class:`~marshmallow_annotations.exception.AnnotationConversionError`::
+
+            registry.get(str)  # string field factory
+            registry.get(object)  # raises AnnotationConversionError
+
+        """
         pass
 
     @abstractmethod
     def register_field_for_type(self, target: type, field: FieldABC) -> None:
+        """
+        Registers a raw marshmallow field to be associated with a type::
+
+            from typing import NewType
+            Email = NewType("Email", str)
+
+            registry.register_field_for_type(Email, EmailField)
+
+        """
         pass
 
     @abstractmethod
-    def register_scheme_constructor(
+    def register_scheme_factory(
         self, target: type, scheme_or_name: Union[str, SchemaABC]
-    ):
+    ) -> None:
+        """
+        Registers an existing scheme or scheme name to be associated with a type::
+
+            from myapp.schema import ArtistScheme
+            from myapp.entities import Artist
+
+            registry.register_scheme_factory(Artist, ArtistScheme)
+
+        """
         pass
 
-    # ideally this is never used and custom implementations provide their
-    # contains implementation as well
+    @abstractmethod
+    def has(self, target: type) -> bool:
+        """
+        Allows safely checking if a type has a companion field mapped already::
+
+            registry.has(int)     # True
+            registry.has(object)  # False
+
+        May also be used with in::
+
+            int in registry     # True
+            object in registry  # False
+        """
+        pass
+
     def __contains__(self, target: type) -> bool:  # pragma: no cover
-        try:
-            return bool(self.get(target))
-        except MarshmallowAnnotationError:
-            return False
+        return self.has(target)

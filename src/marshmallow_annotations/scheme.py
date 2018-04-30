@@ -1,14 +1,22 @@
 from inspect import getmro
-from typing import get_type_hints
 
 from marshmallow.schema import Schema, SchemaMeta, SchemaOpts
 
 from .converter import BaseConverter
-from .exceptions import MarshmallowAnnotationError
-from .registry import TypeRegistry, registry
+from .registry import registry
 
 
 class AnnotationSchemaOpts(SchemaOpts):
+    """
+    ``marshmallow-annotations`` specific SchemaOpts implementation, provides:
+
+    - ``converter_factory``
+    - ``registry``
+    - ``register_as_scheme``
+    - ``target``
+    - ``field_configs``
+    - ``converter``
+    """
 
     def __init__(self, meta, schema=None):
         super().__init__(meta)
@@ -48,8 +56,9 @@ class AnnotationSchemaOpts(SchemaOpts):
             self.registry = source.registry
 
     def _gather_field_configs(self, schema, meta):
+
         def merge_field_configs(opts):
-            field_configs = getattr(opts, 'field_configs', self.__sentinel)
+            field_configs = getattr(opts, "field_configs", self.__sentinel)
 
             if field_configs is self.__sentinel:
                 return
@@ -60,12 +69,12 @@ class AnnotationSchemaOpts(SchemaOpts):
 
         self._extract_from_parents(schema, merge_field_configs)
 
-        defaults = getattr(meta, 'Fields', self.__sentinel)
+        defaults = getattr(meta, "Fields", self.__sentinel)
         if defaults is self.__sentinel:
             return
 
         for k, v in defaults.__dict__.items():
-            if k.startswith('_'):
+            if k.startswith("_"):
                 continue
 
             self.field_configs.setdefault(k, {}).update(v)
@@ -109,10 +118,22 @@ class AnnotationSchemaMeta(SchemaMeta):
         target = getattr(opts, "target", None)
 
         if opts.register_as_scheme and target:
-            opts.converter.registry.register_scheme_constructor(target, self)
+            opts.converter.registry.register_scheme_factory(target, self)
 
 
 class AnnotationSchema(Schema, metaclass=AnnotationSchemaMeta):
+    """
+    Base class for creating annotation schema with::
+
+        from marshmallow_annotations import AnnotationSchema
+        from my.app.entities import Artist
+
+        class ArtistScheme(AnnotationSchema):
+            class Meta:
+                target = Artist
+                register_as_scheme = True
+
+    """
     OPTIONS_CLASS_TYPE = AnnotationSchemaOpts
 
     @classmethod

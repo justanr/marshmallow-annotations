@@ -4,23 +4,62 @@
 API
 ###
 
+
+.. warning::
+
+    Scary looking type signatures a head.
+
+
+********
+Type API
+********
+
+This section will hopeful ease some of the stress and tension that will
+inevitably arise from looking at the following type signatures. Seriously,
+they're not pretty.
+
+
+Field Factory
+=============
+
+A field factory **is not** the field's instance constructor, rather it is
+any callable that accepts:
+
+1. An :class:`~marshmallow_annotations.base.AbstractConverter` instance
+2. A tuple of type hints
+3. A dictionary of configuration values
+
+And returns a fully instantiated marshmallow Field instance, for example::
+
+    from marshmallow import List as ListField
+
+    def sequence_converter(converter, subtypes, opts):
+        return ListField(converter.convet(subtypes[0]), **opts)
+
+This might be registered against :class:`~typing.Tuple`::
+
+    registry.register(typing.Tuple, sequence_converter)
+
+
+A method that accepts a field factory contains the following signature::
+
+    Callable[[AbstractConverter, Tuple[type], Dict[str, Any]], FieldABC]
+
+
 ********
 Registry
 ********
 
 .. autoclass:: marshmallow_annotations.base.TypeRegistry
     :members:
-    :undoc-members:
 
 
 .. autoclass:: marshmallow_annotations.registry.DefaultTypeRegistry
-    :members:
-    :undoc-members:
 
 
-.. autofunction:: marshmallow_annotations.registry.default_field_constructor
+.. autofunction:: marshmallow_annotations.registry.default_field_factory
 
-.. autofunction:: marshmallow_annotations.registry.default_field_constructor
+.. autofunction:: marshmallow_annotations.registry.default_field_factory
 
 
 *********
@@ -30,11 +69,8 @@ Converter
 
 .. autoclass:: marshmallow_annotations.base.AbstractConverter
     :members:
-    :undoc-members:
 
 .. autoclass:: marshmallow_annotations.converter.BaseConverter
-    :members:
-    :undoc-members:
 
 
 ******
@@ -42,11 +78,11 @@ Schema
 ******
 
 .. autoclass:: marshmallow_annotations.scheme.AnnotationSchemaMeta
-    :members:
-    :undoc-members:
 
+    Metaclass that handles produces the
+    :class:`~marshmallow_annotations.scheme.AnnotationSchema` class. Provided
+    for integration into other libraries and toolkits
 
 .. autoclass:: marshmallow_annotations.scheme.AnnotationSchema
-    :members:
-    :undoc-members:
 
+.. autoclass:: marshmallow_annotations.scheme.AnnotationSchemaOpts

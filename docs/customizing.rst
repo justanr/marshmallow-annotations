@@ -46,8 +46,8 @@ as well::
     registry.register_scheme_constructor(Game, 'GameScheme')
 
 
-If more customized behavior is needed, ``field_constructor`` and ``register``
-are also exposed. ``field_constructor`` is the decorator form of ``register``
+If more customized behavior is needed, ``field_factory`` and ``register``
+are also exposed. ``field_factory`` is the decorator form of ``register``
 so it will not be covered here. ``register`` accepts two arguments:
 
 1. The type to associate with
@@ -58,7 +58,7 @@ so it will not be covered here. ``register`` accepts two arguments:
    - A dictionary of configuration values to pass to the generated field
 
 
-For example, :class:`typing.List` has a custom constructor that resembles::
+For example, :class:`typing.List` has a custom factory that resembles::
 
     def _list_converter(converter, subtypes, opts):
         return fields.List(converter.convert(subtypes[0]), **opts)
@@ -67,7 +67,7 @@ For example, :class:`typing.List` has a custom constructor that resembles::
 Under the hood, ``register_scheme_constructor`` and ``register_field_for_type``
 use generalized versions of such a converter, these are exposed as
 :meth:`~marshmallow_annotations.registry.default_scheme_constructor` and
-:meth:`~marshmallow_annotations.registry.default_field_constructor` and are
+:meth:`~marshmallow_annotations.registry.default_field_factory` and are
 availbe for use if needed.
 
 ***************************
@@ -82,11 +82,11 @@ to use a non-global registry by creating your own instance of
 
     my_registry = DefaultTypeRegistry()
 
-It's also possible to pass a dictionary that maps a type to a field constructor
+It's also possible to pass a dictionary that maps a type to a field factory
 into the initializer and pre-configure your registry instance with those
 types::
 
-    conf = {IPv4Address: default_field_constructor(IPAddressField)}
+    conf = {IPv4Address: default_field_factory(IPAddressField)}
 
     my_registry = DefaultTypeRegistry(conf)
 

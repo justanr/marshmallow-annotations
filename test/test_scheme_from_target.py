@@ -23,7 +23,7 @@ def test_autogenerates_fields():
 
     assert isinstance(scheme_fields["id"], fields.UUID)
     assert isinstance(scheme_fields["name"], fields.String)
-    assert scheme_fields["name"].required
+    assert not scheme_fields["name"].required
     assert scheme_fields["name"].allow_none
 
 

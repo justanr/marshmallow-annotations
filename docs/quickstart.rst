@@ -165,7 +165,7 @@ types mapped to marshmallow fields, these fields and their mappings are:
 - :class:`~uuid.UUID` maps to :class:`~marshmallow.fields.UUID`
 
 
-:class:`typing.List` maps to a special field constructor that will attempt
+:class:`typing.List` maps to a special field factory that will attempt
 to locate it's type parameter, e.g. ``List[int]`` will map to
 ``fields.List(fields.Integer())``. The success of mapping to its type parameter
 depends on :ref:`properly configuring your type mappings <customizing>`.
