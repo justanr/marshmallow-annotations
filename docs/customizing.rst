@@ -51,14 +51,14 @@ are also exposed. ``field_factory`` is the decorator form of ``register``
 so it will not be covered here. ``register`` accepts two arguments:
 
 1. The type to associate with
-2. A callable that accepts:
+2. A :ref:`Field Factory`, a callable that accepts:
 
-   - A :class:`~marshmallow_annotations.base.AbstractConverter` instance
-   - A tuple of type hints
-   - A dictionary of configuration values to pass to the generated field
+    1. An :class:`~marshmallow_annotations.base.AbstractConverter` instance
+    2. A tuple of type hints
+    3. A dictionary of configuration values for the underlying field
 
-
-For example, :class:`typing.List` has a custom factory that resembles::
+And returns a fully instantiated marshmallow Field instance. For example,
+:class:`typing.List` has a custom factory that resembles::
 
     def _list_converter(converter, subtypes, opts):
         return fields.List(converter.convert(subtypes[0]), **opts)
@@ -68,7 +68,7 @@ Under the hood, ``register_scheme_constructor`` and ``register_field_for_type``
 use generalized versions of such a converter, these are exposed as
 :meth:`~marshmallow_annotations.registry.default_scheme_constructor` and
 :meth:`~marshmallow_annotations.registry.default_field_factory` and are
-availbe for use if needed.
+availabe for use if needed.
 
 ***************************
 Using a non-Global registry
@@ -106,4 +106,13 @@ Custom Converters
 
 Another customization point is implementing your own
 :class:`~marshmallow_annotations.base.AbstractConverter` class as well to
-provide to schema definitions.
+provide to schema definitions::
+
+    class MyConverter(AbstractConverter):
+        # impl contract
+
+
+    class SomeSchema(AnnotationSchema):
+        class Meta:
+            target = MyType
+            converter_factory = MyConverter

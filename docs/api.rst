@@ -1,8 +1,8 @@
 .. _api:
 
-###
-API
-###
+###########################
+marshmallow_annotations API
+###########################
 
 
 .. warning::
@@ -27,7 +27,7 @@ any callable that accepts:
 
 1. An :class:`~marshmallow_annotations.base.AbstractConverter` instance
 2. A tuple of type hints
-3. A dictionary of configuration values
+3. A dictionary of configuration values for the underlying field
 
 And returns a fully instantiated marshmallow Field instance, for example::
 

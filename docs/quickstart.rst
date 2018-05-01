@@ -14,7 +14,7 @@ Annotating your class
 Before we can make use of ``marshmallow-annotations`` we first need to annotate
 some classes::
 
-    import typing as t
+    from typing import List
 
     class Album:
         id: int
@@ -54,28 +54,32 @@ some classes::
             albums: List[Album] = attr.ib(default=attr.Factory(list))
 
 
+
 With these classes defined, we can declare our schema.
 
 
 .. danger::
 
-    As Python 3.6, forward declarations do not properly work and will
-    cause much pain and suffering if they're used in conjunction with
-    ``marshmallow-annotations``, if an object needs to hold a reference
-    to a property that is the same type of itself (or, for example, a
-    collection of those objects) or is attempting to "forward reference"
-    a class that doesn't exist yet, an exception will be thrown when
-    type annotations are gathered.
+    Until Python 3.6.5, evaluation of forward declarations with
+    :func:`typing.get_type_hints` -- the method that ``marshmallow-annotations``
+    uses to gather hints -- did not work properly. If you are using a class
+    that has a forward reference to either itself or a class not yet defined,
+    it will fail when used with ``marshmallow-annotations``.
 
-    For the time being, these references **must** be manually mapped.
+    For these classes, it is recommended to not use this library with them
+    unless you are using 3.6.5+.
+
+    Additionally, ``marshmallow-annotations`` does not currently handle
+    forward references properly either and it is recommended to manually
+    map these fields when used.
 
 
-******
-Schema
-******
+***************
+Building Schema
+***************
 
 The most basic scheme with ``marshmallow-annotations`` is a Meta definition
-on the an :class:`~marshmallow.scheme.AnnotationSchema` subclass::
+on an :class:`~marshmallow.scheme.AnnotationSchema` subclass::
 
     from marshmallow_annotations import AnnotationSchema
 
@@ -114,7 +118,9 @@ based on our annotations::
 
 If you're curious what the ``register_as_scheme`` option does, this causes the
 generated scheme to become associated with the target type in the internal
-type mapping.
+type mapping and the type will be resolved to its scheme (e.g. in the above
+example, future references to ``Album`` in type hints will resolve to
+``AlbumScheme``).
 
 
 With the schema defined we can serialize our ``Artist`` and ``Album`` classes
@@ -168,21 +174,24 @@ types mapped to marshmallow fields, these fields and their mappings are:
 :class:`typing.List` maps to a special field factory that will attempt
 to locate it's type parameter, e.g. ``List[int]`` will map to
 ``fields.List(fields.Integer())``. The success of mapping to its type parameter
-depends on :ref:`properly configuring your type mappings <customizing>`.
+depends on :ref:`properly configuring your type mappings <customizing>`. If
+List's interior typehint can't be resolved, then a
+:class:`~marshmallow_annotations.exception.AnnotationConversionError` is raised.
 
 Another special type is :class:`typing.Optional` (aka :class:`typing.Union[T, None]`).
 When ``marshmallow-annotations`` encounters a type hint wrapped in ``Optional``
-it generates the base field, however ``required`` is set to False and ``allow_none``
-is set to True.
+it generates the base fieldi but will default ``required`` to False and
+``allow_none`` to True :ref:`unless overridden <Configuring Fields>`.
 
 .. danger::
 
     Right now ``marshmallow-annotations`` will only inspect the first member
     of a Union if it thinks it's actually an Optional. The heuristics for this
-    are simply if the type hint is a Union and the last parameter is NoneType.
+    are simple and naive: if the type hint is a Union and the last parameter
+    is NoneType then it's obviously an ``Optional``.
 
-    The following hint will generate an int even though it's hinting at either
-    an int or a float::
+    The following hint will generate an int even though it's hinting at a type
+    that may be either an int, a float or a None::
 
         Union[int, float, None]
 
@@ -191,30 +200,28 @@ is set to True.
 Configuring Fields
 ******************
 
-By default basic fields will be generated with only ``required`` and ``allow_none``
-set to True and False respectively -- unless the type hint is wrapped in an ``Optional``
-in which case these values are flipped so ``required`` is False and ``allow_none`` is True.
-
-However, sometimes a small adjustment is needed to the generated field. Rather than
-require writing out the entire definition, you can use ``Meta.Fields`` to declare
-how to build the generated fields.
-
+By default, fields will be generated with ``required=True`` and ``allow_none=False``
+(however, as mentioned above, an ``Optional`` type hint flips these). However,
+sometimes a small adjustment is needed to the generated field. Rather than
+require writing out the entire definition, you can use ``Meta.Fields`` to
+declare how to build the generated fields.
 
 For example, if ``Artist`` should receive a default name if one is not provided,
 it may be configured this way::
+
 
     class ArtistScheme(AnnotationSchema):
         class Meta:
             target = Artist
             register_as_scheme = True
 
-            class Field:
+            class Fields:
                 name = {"default": "One Man Awesome Band"}
 
 Each individual field may be configured here with a dictionary and the values
 of the dictionary will be passed to the field's constructor when it is generated.
 
-You may also predefined how fields should be configured on a parent scheme
+You may also predefine how fields should be configured on a parent scheme
 and the children will inherit those configurations::
 
 
