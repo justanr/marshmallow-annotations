@@ -1,8 +1,10 @@
+import sys
 import typing as t
 from uuid import UUID
 
-import pytest
 from marshmallow import fields
+
+import pytest
 from marshmallow_annotations.converter import BaseConverter
 from marshmallow_annotations.scheme import AnnotationSchema
 
@@ -10,6 +12,17 @@ from marshmallow_annotations.scheme import AnnotationSchema
 class SomeTypeThing:
     id: UUID
     name: t.Optional[str]
+
+
+class SomeType:
+    children: t.List["SomeType"]
+    id: int
+
+    def __init__(self, id, children=None):
+        self.id = id
+        if children is None:
+            children = []
+        self.children = children
 
 
 def test_autogenerates_fields():
@@ -171,18 +184,9 @@ def test_uses_parent_converter_if_none_present_here():
     assert SomeTypeThingSchemeJr.opts.converter.called
 
 
+@pytest.mark.skipif(sys.version_info < (3, 6, 5), reason="Requires 3.6.5+")
 @pytest.mark.xfail(strict=True)
 def test_forward_declaration_of_scheme_target():
-
-    class SomeType:
-        children: t.List["SomeType"]
-        id: int
-
-        def __init__(self, id, children: t.Optional[t.List["SomeType"]] = None) -> None:
-            self.id = id
-            if children is None:
-                children = []
-            self.children = children
 
     class SomeTypeScheme(AnnotationSchema):
 
