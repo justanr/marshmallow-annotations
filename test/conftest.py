@@ -17,7 +17,7 @@ def clear_registry():
 
 
 @pytest.fixture
-def registry():
+def registry_():
     yield DefaultTypeRegistry()
 
 
@@ -29,16 +29,3 @@ def scheme():
         name = fields.String()
 
     yield ConverterTestScheme
-
-
-@pytest.fixture
-def SchemeParent(registry):
-    _registry = registry
-
-    class SchemeParent(AnnotationSchema):
-
-        class Meta:
-            registry = _registry
-            register_as_scheme = True
-
-    return SchemeParent

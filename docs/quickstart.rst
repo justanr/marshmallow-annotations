@@ -58,17 +58,6 @@ some classes::
 With these classes defined, we can declare our schema.
 
 
-.. danger::
-
-    Until Python 3.6.5, evaluation of forward declarations with
-    :func:`typing.get_type_hints` -- the method that ``marshmallow-annotations``
-    uses to gather hints -- did not work properly. If you are using a class
-    that has a forward reference to either itself or a class not yet defined,
-    it will fail when used with ``marshmallow-annotations``.
-
-    For these classes, it is recommended to not use forward declarations with
-    this library unless you are using 3.6.5+.
-
 
 
 ***************
@@ -198,6 +187,38 @@ it generates the base fieldi but will default ``required`` to False and
 
         Union[int, float, None]
 
+
+Forward Declaration
+===================
+
+``marshmallow-annotations`` can handle forward declarations of a target type
+into itself if ``register_as_scheme`` is set to True::
+
+    class MyType:
+        children: List[MyType]
+
+
+    class MyTypeSchema(AnnotationSchema):
+        class Meta:
+            target = MyType
+            register_as_scheme = True
+
+
+The ``register_as_scheme`` option is very eager and will set the generated
+schema class into the register as soon as it determines it can, which occurs
+before field generation happens.
+
+.. danger::
+
+    Until Python 3.6.5, evaluation of forward declarations with
+    :func:`typing.get_type_hints` -- the method that ``marshmallow-annotations``
+    uses to gather hints -- did not work properly. If you are using a class
+    that has a forward reference to either itself or a class not yet defined,
+    it will fail when used with ``marshmallow-annotations``.
+
+    For these classes, it is recommended to not use forward declarations with
+    this library unless you are using 3.6.5+ or backport 3.6.5's fixes to
+    ``typing.get_type_hints`` into your application and monkey patch it in.
 
 ******************
 Configuring Fields

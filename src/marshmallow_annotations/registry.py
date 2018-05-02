@@ -35,7 +35,7 @@ def scheme_factory(scheme_name: str) -> FieldFactory:
         return fields.Nested(scheme_name, **opts)
 
     _.__name__ = f"{scheme_name}FieldFactory"
-    _.__is_scheme__ = True
+    _.__is_scheme__ = True  # type: ignore
     return _
 
 

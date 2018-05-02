@@ -4,24 +4,25 @@ from marshmallow.schema import Schema, SchemaMeta, SchemaOpts
 
 from .converter import BaseConverter
 from .registry import registry
+from typing import Dict, Any
 
 
 class AnnotationSchemaOpts(SchemaOpts):
     """
-    ``marshmallow-annotations`` specific SchemaOpts implementation, provides:
+    marshmallow-annotations specific SchemaOpts implementation, provides:
 
-    - ``converter_factory``
-    - ``registry``
-    - ``register_as_scheme``
-    - ``target``
-    - ``field_configs``
-    - ``converter``
+    - converter_factory
+    - registry
+    - register_as_scheme
+    - target
+    - field_configs
+    - converter
     """
 
     def __init__(self, meta, schema=None):
         super().__init__(meta)
         self.__sentinel = object()
-        self.field_configs = {}
+        self.field_configs: Dict[str, Dict[str, Any]] = {}
 
         self._process(meta, schema)
         self._finalize()
