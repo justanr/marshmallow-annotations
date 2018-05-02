@@ -51,6 +51,14 @@ class AbstractConverter(ABC):
         """
         pass
 
+    @abstractmethod
+    def is_scheme(self, typehint: type) -> bool:
+        """
+        Used to check if the typehint passed if associated to a scheme or
+        a regular field constructor.
+        """
+        pass
+
 
 FieldFactory = Callable[[AbstractConverter, Tuple[type], Dict[str, Any]], FieldABC]
 
@@ -63,7 +71,6 @@ class TypeRegistry(ABC):
     This abstract class is provided primarily for type hinting purposes but also
     allows implementations outside of the default implementation in this library.
     """
-
 
     @abstractmethod
     def register(self, target: type, constructor: FieldFactory) -> None:

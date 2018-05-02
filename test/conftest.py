@@ -3,6 +3,7 @@ from marshmallow.class_registry import _registry
 
 import pytest
 from marshmallow_annotations.registry import DefaultTypeRegistry
+from marshmallow_annotations.scheme import AnnotationSchema
 
 
 # testing the converter means creating a scheme to test with it
@@ -28,3 +29,16 @@ def scheme():
         name = fields.String()
 
     yield ConverterTestScheme
+
+
+@pytest.fixture
+def SchemeParent(registry):
+    _registry = registry
+
+    class SchemeParent(AnnotationSchema):
+
+        class Meta:
+            registry = _registry
+            register_as_scheme = True
+
+    return SchemeParent

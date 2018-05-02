@@ -66,6 +66,10 @@ class BaseConverter(AbstractConverter):
             if k not in ignore and should_include(v)
         }
 
+    def is_scheme(self, typehint: type) -> bool:
+        constructor = self.registry.get(typehint)
+        return getattr(constructor, "__is_scheme__", False)
+
     def _field_from_typehint(self, typehint, kwargs=None):
         # need that immutable dict in the stdlib pls
         kwargs = kwargs if kwargs is not None else {}

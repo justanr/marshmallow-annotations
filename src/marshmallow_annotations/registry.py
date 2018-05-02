@@ -10,7 +10,7 @@ from .base import AbstractConverter, ConfigOptions, FieldFactory, TypeRegistry
 from .exceptions import AnnotationConversionError
 
 
-def default_field_factory(field: FieldABC) -> FieldFactory:
+def field_factory(field: FieldABC) -> FieldFactory:
     """
     Maps a marshmallow field into a field factory
     """
@@ -24,7 +24,7 @@ def default_field_factory(field: FieldABC) -> FieldFactory:
     return _
 
 
-def default_scheme_factory(scheme_name: str) -> FieldFactory:
+def scheme_factory(scheme_name: str) -> FieldFactory:
     """
     Maps a scheme or scheme name into a field factory
     """
@@ -35,12 +35,16 @@ def default_scheme_factory(scheme_name: str) -> FieldFactory:
         return fields.Nested(scheme_name, **opts)
 
     _.__name__ = f"{scheme_name}FieldFactory"
+    _.__is_scheme__ = True
     return _
 
 
 def _list_converter(
     converter: AbstractConverter, subtypes: Tuple[type], opts: ConfigOptions
 ) -> FieldABC:
+    if converter.is_scheme(subtypes[0]):
+        opts['many'] = True
+        return converter.convert(subtypes[0], opts)
     return fields.List(converter.convert(subtypes[0]), **opts)
 
 
@@ -67,7 +71,7 @@ class DefaultTypeRegistry(TypeRegistry):
     """
 
     _registry = {
-        k: default_field_factory(v)
+        k: field_factory(v)
         for k, v in {
             bool: fields.Boolean,
             date: fields.Date,
@@ -100,12 +104,12 @@ class DefaultTypeRegistry(TypeRegistry):
         return converter
 
     def register_field_for_type(self, target: type, field: FieldABC) -> None:
-        self.register(target, default_field_factory(field))
+        self.register(target, field_factory(field))
 
     def register_scheme_factory(
         self, target: type, scheme_or_name: Union[str, SchemaABC]
     ) -> None:
-        self.register(target, default_scheme_factory(scheme_or_name))
+        self.register(target, scheme_factory(scheme_or_name))
 
     def has(self, target: type) -> bool:
         return target in self._registry

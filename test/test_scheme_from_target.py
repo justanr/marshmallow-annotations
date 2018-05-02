@@ -25,9 +25,9 @@ class SomeType:
         self.children = children
 
 
-def test_autogenerates_fields():
+def test_autogenerates_fields(SchemeParent):
 
-    class SomeTypeThingScheme(AnnotationSchema):
+    class SomeTypeThingScheme(SchemeParent):
 
         class Meta:
             target = SomeTypeThing
@@ -40,9 +40,9 @@ def test_autogenerates_fields():
     assert scheme_fields["name"].allow_none
 
 
-def test_pulls_settings_from_meta():
+def test_pulls_settings_from_meta(SchemeParent):
 
-    class SomeTypeThingScheme(AnnotationSchema):
+    class SomeTypeThingScheme(SchemeParent):
 
         class Meta:
             target = SomeTypeThing
@@ -55,9 +55,9 @@ def test_pulls_settings_from_meta():
     assert name_field.default == "it wasn't there"
 
 
-def test_doesnt_overwrite_explicitly_declared_fields():
+def test_doesnt_overwrite_explicitly_declared_fields(SchemeParent):
 
-    class SomeTypeThingScheme(AnnotationSchema):
+    class SomeTypeThingScheme(SchemeParent):
         id = fields.String()
 
         class Meta:
@@ -68,9 +68,9 @@ def test_doesnt_overwrite_explicitly_declared_fields():
     assert isinstance(id_field, fields.String)
 
 
-def test_doesnt_overwrite_explicitly_declared_fields_from_parent():
+def test_doesnt_overwrite_explicitly_declared_fields_from_parent(SchemeParent):
 
-    class SomeTypeThingScheme(AnnotationSchema):
+    class SomeTypeThingScheme(SchemeParent):
         id = fields.String()
 
     class SomeTypeThingSchemeJr(SomeTypeThingScheme):
@@ -83,9 +83,9 @@ def test_doesnt_overwrite_explicitly_declared_fields_from_parent():
     assert isinstance(id_field, fields.String)
 
 
-def test_pulls_configuration_from_parent():
+def test_pulls_configuration_from_parent(SchemeParent):
 
-    class SomeTypeThingScheme(AnnotationSchema):
+    class SomeTypeThingScheme(SchemeParent):
 
         class Meta:
 
@@ -104,9 +104,9 @@ def test_pulls_configuration_from_parent():
     ), SomeTypeThingSchemeJr.opts.field_configs
 
 
-def test_merges_configuration_with_parents():
+def test_merges_configuration_with_parents(SchemeParent):
 
-    class SomeTypeThingScheme(AnnotationSchema):
+    class SomeTypeThingScheme(SchemeParent):
 
         class Meta:
 
@@ -130,7 +130,7 @@ def test_merges_configuration_with_parents():
     assert id_field.default == 1
 
 
-def test_can_use_custom_converter():
+def test_can_use_custom_converter(SchemeParent):
 
     class TattleConverter(BaseConverter):
 
@@ -138,7 +138,7 @@ def test_can_use_custom_converter():
             self.called = True
             return super().convert_all(target, ignore, configs)
 
-    class SomeTypeThingScheme(AnnotationSchema):
+    class SomeTypeThingScheme(SchemeParent):
 
         class Meta:
             converter_factory = TattleConverter
@@ -163,7 +163,7 @@ def test_registers_schema_as_field_for_target_type(registry):
     assert SomeTypeThing in registry
 
 
-def test_uses_parent_converter_if_none_present_here():
+def test_uses_parent_converter_if_none_present_here(SchemeParent):
 
     class TattleConverter(BaseConverter):
 
@@ -171,7 +171,7 @@ def test_uses_parent_converter_if_none_present_here():
             self.called = True
             return super().convert_all(target, ignore, configs)
 
-    class SomeTypeThingScheme(AnnotationSchema):
+    class SomeTypeThingScheme(SchemeParent):
 
         class Meta:
             converter_factory = TattleConverter
@@ -186,9 +186,9 @@ def test_uses_parent_converter_if_none_present_here():
 
 @pytest.mark.skipif(sys.version_info < (3, 6, 5), reason="Requires 3.6.5+")
 @pytest.mark.xfail(strict=True)
-def test_forward_declaration_of_scheme_target():
+def test_forward_declaration_of_scheme_target(SchemeParent):
 
-    class SomeTypeScheme(AnnotationSchema):
+    class SomeTypeScheme(SchemeParent):
 
         class Meta:
             target = SomeType
@@ -199,3 +199,30 @@ def test_forward_declaration_of_scheme_target():
     expected = {"id": 1, "children": [{"id": 2, "children": []}]}
     assert not result.errors
     assert result.data == expected
+
+
+def test_builds_nested_many_field_when_typehint_is_scheme(SchemeParent):
+
+    class Album:
+        name: str
+
+    class Artist:
+        name: str
+        albums: t.List[Album]
+
+    class AlbumScheme(SchemeParent):
+
+        class Meta:
+            target = Album
+            register_as_scheme = True
+
+    class ArtistScheme(SchemeParent):
+
+        class Meta:
+            target = Artist
+            register_as_scheme = True
+
+    artist_fields = ArtistScheme._declared_fields
+
+    assert isinstance(artist_fields["albums"], fields.Nested)
+    assert artist_fields["albums"].many

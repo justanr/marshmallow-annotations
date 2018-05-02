@@ -6,7 +6,7 @@ import pytest
 from marshmallow_annotations.exceptions import AnnotationConversionError
 from marshmallow_annotations.registry import (
     DefaultTypeRegistry,
-    default_field_factory,
+    field_factory,
 )
 
 
@@ -66,6 +66,6 @@ def test_register_raw_field_type():
 
 
 def test_can_preregister_type_field_mapping():
-    preregistered = {IPv4Address: default_field_factory(fields.String)}
+    preregistered = {IPv4Address: field_factory(fields.String)}
     registry = DefaultTypeRegistry(preregistered)
     assert registry.get(IPv4Address) is preregistered[IPv4Address]
