@@ -66,9 +66,8 @@ class DefaultTypeRegistry(TypeRegistry):
     - timedelta -> fields.TimeDelta
     - UUID -> fields.UUID
 
-    As well typing.List[T] -> fields.List
-
-    Uses a dictionary as its backing store.
+    As well as a special factory for typing.List[T] that will generate either
+    fields.List or fields.Nested
     """
 
     _registry = {

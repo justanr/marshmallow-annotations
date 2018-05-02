@@ -185,7 +185,6 @@ def test_uses_parent_converter_if_none_present_here(SchemeParent):
 
 
 @pytest.mark.skipif(sys.version_info < (3, 6, 5), reason="Requires 3.6.5+")
-@pytest.mark.xfail(strict=True)
 def test_forward_declaration_of_scheme_target(SchemeParent):
 
     class SomeTypeScheme(SchemeParent):

@@ -57,9 +57,9 @@ Registry
 .. autoclass:: marshmallow_annotations.registry.DefaultTypeRegistry
 
 
-.. autofunction:: marshmallow_annotations.registry.default_field_factory
+.. autofunction:: marshmallow_annotations.registry.field_factory
 
-.. autofunction:: marshmallow_annotations.registry.default_field_factory
+.. autofunction:: marshmallow_annotations.registry.scheme_factory
 
 
 *********

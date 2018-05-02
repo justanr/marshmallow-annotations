@@ -1,8 +1,8 @@
 .. _customizing:
 
-###########
-Customizing
-###########
+########################################
+Custom Constructor, Types and Registries
+########################################
 
 
 There are several ways to customize how fields are generated from types in your
@@ -66,8 +66,8 @@ And returns a fully instantiated marshmallow Field instance. For example,
 
 Under the hood, ``register_scheme_constructor`` and ``register_field_for_type``
 use generalized versions of such a converter, these are exposed as
-:meth:`~marshmallow_annotations.registry.default_scheme_constructor` and
-:meth:`~marshmallow_annotations.registry.default_field_factory` and are
+:meth:`~marshmallow_annotations.registry.scheme_factory` and
+:meth:`~marshmallow_annotations.registry.field_factory` and are
 availabe for use if needed.
 
 ***************************
@@ -86,10 +86,21 @@ It's also possible to pass a dictionary that maps a type to a field factory
 into the initializer and pre-configure your registry instance with those
 types::
 
-    conf = {IPv4Address: default_field_factory(IPAddressField)}
+    conf = {IPv4Address: field_factory(IPAddressField)}
 
     my_registry = DefaultTypeRegistry(conf)
 
+
+A specific registry instance can be attached to a scheme by declaring the
+``registry`` field on the Meta options::
+
+    class MyScheme(AnnotationSchema):
+        class Meta:
+            registry = my_registry
+
+
+Now this specific Scheme will derive fields from the mappings found in
+``my_registry``.
 
 ***************
 Custom Registry

@@ -26,6 +26,10 @@ class AnnotationSchemaOpts(SchemaOpts):
         self._process(meta, schema)
         self._finalize()
         self.converter = self.converter_factory(registry=self.registry)
+
+        if schema is not None and self.register_as_scheme and hasattr(self, "target"):
+            self.converter.registry.register_scheme_factory(self.target, schema)
+
         del self.__sentinel
 
     def _process(self, meta, schema):
@@ -87,12 +91,6 @@ class AnnotationSchemaOpts(SchemaOpts):
 
 class AnnotationSchemaMeta(SchemaMeta):
 
-    @staticmethod
-    def __new__(mcls, name, bases, attrs, **k):
-        cls = super().__new__(mcls, name, bases, attrs)
-        cls._register_as_scheme_for_target(cls.opts)
-        return cls
-
     @classmethod
     def get_declared_fields(mcls, klass, cls_fields, inherited_fields, dict_cls):
         fields = super().get_declared_fields(
@@ -112,13 +110,6 @@ class AnnotationSchemaMeta(SchemaMeta):
         fields.update(converter.convert_all(target, ignore, klass.opts.field_configs))
 
         return fields
-
-    def _register_as_scheme_for_target(self, opts):
-
-        target = getattr(opts, "target", None)
-
-        if opts.register_as_scheme and target:
-            opts.converter.registry.register_scheme_factory(target, self)
 
 
 class AnnotationSchema(Schema, metaclass=AnnotationSchemaMeta):

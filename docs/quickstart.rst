@@ -66,12 +66,9 @@ With these classes defined, we can declare our schema.
     that has a forward reference to either itself or a class not yet defined,
     it will fail when used with ``marshmallow-annotations``.
 
-    For these classes, it is recommended to not use this library with them
-    unless you are using 3.6.5+.
+    For these classes, it is recommended to not use forward declarations with
+    this library unless you are using 3.6.5+.
 
-    Additionally, ``marshmallow-annotations`` does not currently handle
-    forward references properly either and it is recommended to manually
-    map these fields when used.
 
 
 ***************
@@ -107,14 +104,8 @@ based on our annotations::
     class ArtistScheme(Schema):
         id = fields.Integer(required=True, allow_none=False)
         name = fields.String(required=True, allow_none=False)
-        albums = fields.List(fields.Nested('AlbumScheme'), required=True, allow_none=False)
+        albums = fields.Nested('AlbumScheme', many=True, required=True, allow_none=False)
 
-
-.. note::
-
-    Right now ``marshmallow-annotations`` generates ``List(Nested(SchemeName))``
-    rather than ``Nested(SchemaName, many=True)``. This may affect how you
-    choose to configure your fields via meta options.`
 
 If you're curious what the ``register_as_scheme`` option does, this causes the
 generated scheme to become associated with the target type in the internal
@@ -171,12 +162,24 @@ types mapped to marshmallow fields, these fields and their mappings are:
 - :class:`~uuid.UUID` maps to :class:`~marshmallow.fields.UUID`
 
 
+List[T]
+=======
+
 :class:`typing.List` maps to a special field factory that will attempt
 to locate it's type parameter, e.g. ``List[int]`` will map to
-``fields.List(fields.Integer())``. The success of mapping to its type parameter
-depends on :ref:`properly configuring your type mappings <customizing>`. If
-List's interior typehint can't be resolved, then a
+``fields.List(fields.Integer())``. Alternatively, ``List[T]`` can generate
+a ``fields.Nested(TScheme, many=True)`` if its factory can determine that
+its subtype has a scheme factory registered rather than a field factory.
+
+
+The success of mapping to its type parameter depends on
+:ref:`properly configuring your type mappings <customizing>`. If List's
+interior typehint can't be resolved, then a
 :class:`~marshmallow_annotations.exception.AnnotationConversionError` is raised.
+
+
+Optional[T]
+===========
 
 Another special type is :class:`typing.Optional` (aka :class:`typing.Union[T, None]`).
 When ``marshmallow-annotations`` encounters a type hint wrapped in ``Optional``
@@ -275,7 +278,7 @@ provides several other options that can be set in the "Meta" object on a scheme:
   :class:`~marshmallow_annotations.base.TypeRegistry` by keyword argument
   ``registry`` and produces a
   :class:`~marshmallow_annotations.base.AbstractConverter` instance. By default
-  this is :class:`~marshmallow_annotations.converter.BaseConverter`
+  this is :class:`~marshmallow_annotations.converter.BaseConverter`.
 
 - ``registry``: A registry to use in place of the global type registry, must be
   an instance of :class:`~marshmallow_annotations.base.TypeRegistry`.
