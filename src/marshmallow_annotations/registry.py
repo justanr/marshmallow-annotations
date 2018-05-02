@@ -43,9 +43,10 @@ def _list_converter(
     converter: AbstractConverter, subtypes: Tuple[type], opts: ConfigOptions
 ) -> FieldABC:
     if converter.is_scheme(subtypes[0]):
-        opts['many'] = True
+        opts["many"] = True
         return converter.convert(subtypes[0], opts)
-    return fields.List(converter.convert(subtypes[0]), **opts)
+    sub_opts = opts.pop("_interior", {})
+    return fields.List(converter.convert(subtypes[0], sub_opts), **opts)
 
 
 class DefaultTypeRegistry(TypeRegistry):

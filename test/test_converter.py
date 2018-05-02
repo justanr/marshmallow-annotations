@@ -65,3 +65,12 @@ def test_ignores_classvar_when_generating_fields(registry):
     generated_fields = converter.convert_all(SomeOtherType)
 
     assert "frob" not in generated_fields
+
+
+def test_passes_interior_options_to_list_subtype(registry):
+    converter = BaseConverter(registry=registry)
+
+    opts = {"_interior": {"as_string": True}}
+    field = converter.convert(typing.List[int], opts)
+
+    assert field.container.as_string
