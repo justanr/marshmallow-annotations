@@ -105,8 +105,9 @@ class AnnotationSchemaMeta(SchemaMeta):
         converter = klass.opts.converter
 
         # ignore anything explicitly declared on this scheme
-        # or any parent scheme
-        ignore = fields.keys()
+        # or any parent scheme, also ignore anything explicitly
+        # passed into exclude
+        ignore = set(fields) | set(klass.opts.exclude)
         fields.update(converter.convert_all(target, ignore, klass.opts.field_configs))
 
         return fields

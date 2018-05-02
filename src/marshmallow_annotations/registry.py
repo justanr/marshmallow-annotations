@@ -1,6 +1,6 @@
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Callable, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 from uuid import UUID
 
 from marshmallow import fields

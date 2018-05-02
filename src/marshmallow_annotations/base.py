@@ -3,8 +3,6 @@ from typing import AbstractSet, Any, Callable, Dict, Optional, Tuple, Union
 
 from marshmallow.base import FieldABC, SchemaABC
 
-from .exceptions import MarshmallowAnnotationError
-
 ConfigOptions = Optional[Dict[str, Any]]
 NamedConfigs = Optional[Dict[str, ConfigOptions]]
 GeneratedFields = Dict[str, FieldABC]
@@ -41,7 +39,7 @@ class AbstractConverter(ABC):
     def convert_all(
         self,
         target: type,
-        ignore: AbstractSet[str] = frozenset([]),
+        ignore: AbstractSet[str] = frozenset([]),  # noqa: B008
         configs: NamedConfigs = None,
     ) -> GeneratedFields:
         """

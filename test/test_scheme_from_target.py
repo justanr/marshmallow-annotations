@@ -225,3 +225,14 @@ def test_builds_nested_many_field_when_typehint_is_scheme(SchemeParent):
 
     assert isinstance(artist_fields["albums"], fields.Nested)
     assert artist_fields["albums"].many
+
+
+def test_excludes_fields_declared_in_exclude(SchemeParent):
+
+    class SomeTypeThingScheme(SchemeParent):
+
+        class Meta:
+            target = SomeTypeThing
+            exclude = ("id",)
+
+    assert "id" not in SomeTypeThingScheme._declared_fields

@@ -20,9 +20,9 @@ def _is_optional(typehint):
     # only supports single type optionals/unions
     # as for the implementation... look, don't ask me
     return (
-        _UNION_TYPE in type(typehint).__mro__
-        and len(typehint.__args__) == 2
-        and typehint.__args__[1] is NoneType
+        _UNION_TYPE in type(typehint).__mro__  # noqa
+        and len(typehint.__args__) == 2  # noqa
+        and typehint.__args__[1] is NoneType  # noqa
     )
 
 
