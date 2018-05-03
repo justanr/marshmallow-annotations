@@ -1,7 +1,6 @@
 from .converter import BaseConverter
 from .exceptions import AnnotationConversionError, MarshmallowAnnotationError
 from .registry import TypeRegistry, field_factory, registry, scheme_factory
-from .schema import AnnotatedSchema, AnnotatedSchemaMeta
 from .scheme import AnnotationSchema, AnnotationSchemaMeta
 
 __version__ = "1.0.0"
