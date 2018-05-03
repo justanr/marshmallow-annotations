@@ -21,11 +21,12 @@ exclude_lines =
     if False:
     if __name__ == .__main__.:
     @abstractmethod
+    pragma: no branch
 
 fail_under = 80
 precision = 2
 show_missing = true
-skip_covered = true
+skip_covered = false
 
 [html]
 directory = test/htmlcov

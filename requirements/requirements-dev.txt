@@ -1,0 +1,4 @@
+-rrequirements-types.txt
+-rrequirements-docs.txt
+tox==3.0.0
+bumpversion==0.5.3
