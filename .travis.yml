@@ -14,7 +14,7 @@ deploy:
   user: justanr
   distributions: sdist bdist_wheel
   on:
-    #    tags: true
+    tags: true
     repo: justanr/marshmallow-annotations
     python: '3.6'
     branch: master
