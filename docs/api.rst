@@ -86,3 +86,15 @@ Schema
 .. autoclass:: marshmallow_annotations.scheme.AnnotationSchema
 
 .. autoclass:: marshmallow_annotations.scheme.AnnotationSchemaOpts
+
+
+**********
+NamedTuple
+**********
+
+.. autoclass:: marshmallow_annotations.schema.NamedTupleConverter
+
+.. autoclass:: marshmallow_annotations.schema.NamedTupleSchemaOpts
+
+.. autoclass:: marshmallow_annotations.schema.NamedTupleSchema
+    :members:
