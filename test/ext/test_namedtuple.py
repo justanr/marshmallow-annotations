@@ -14,6 +14,7 @@ def test_instance_conversion(registry_):
         class Meta:
             registry = registry_
             target = SomeTuple
+            dump_default_fields = False
 
     s = SomeTupleSchema()
     result = s.load({'a': 1, 'b': 2, 'c': 3})
@@ -28,6 +29,7 @@ def test_missing_values(registry_):
         class Meta:
             registry = registry_
             target = SomeTuple
+            dump_default_fields = False
 
     s = SomeTupleSchema()
     result = s.load({'a': 1})
@@ -42,6 +44,7 @@ def test_missing_not_overrides(registry_):
         class Meta:
             registry = registry_
             target = SomeTuple
+            dump_default_fields = False
 
     s = SomeTupleSchema()
     result = s.load({'a': 1, 'c': None})
@@ -56,6 +59,7 @@ def test_missing_required(registry_):
         class Meta:
             registry = registry_
             target = SomeTuple
+            dump_default_fields = False
 
     s = SomeTupleSchema()
     result = s.load({})
@@ -68,6 +72,7 @@ def test_remove_none_serialization(registry_):
         class Meta:
             registry = registry_
             target = SomeTuple
+            dump_default_fields = False
 
     s = SomeTupleSchema()
     result = s.dump(SomeTuple(a=1, b=None, c=None))
@@ -82,6 +87,7 @@ def test_remove_default_serialize(registry_):
         class Meta:
             registry = registry_
             target = SomeTuple
+            dump_default_fields = False
 
     s = SomeTupleSchema()
     result = s.dump(SomeTuple(a=1, b=3, c=5))
