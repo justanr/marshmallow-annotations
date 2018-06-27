@@ -1,20 +1,12 @@
 import typing
 
-from marshmallow_annotations.namedtuple import NamedTupleConverter, NamedTupleSchema
+from marshmallow_annotations.ext.namedtuple import NamedTupleSchema
 
 
 class SomeTuple(typing.NamedTuple):
     a: int
     b: typing.Optional[int]
     c: typing.Optional[int] = 5
-
-
-def test_convert_missing(registry_):
-    converter = NamedTupleConverter(registry=registry_)
-
-    generated_fields = converter.convert_all(SomeTuple)
-    assert generated_fields['b'].missing is None
-    assert generated_fields['c'].missing == 5
 
 
 def test_instance_conversion(registry_):

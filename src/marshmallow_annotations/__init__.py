@@ -1,6 +1,5 @@
 from .converter import BaseConverter
 from .exceptions import AnnotationConversionError, MarshmallowAnnotationError
-from .namedtuple import NamedTupleConverter, NamedTupleSchema
 from .registry import TypeRegistry, field_factory, registry, scheme_factory
 from .scheme import AnnotationSchema, AnnotationSchemaMeta
 
