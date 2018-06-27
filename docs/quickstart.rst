@@ -38,9 +38,7 @@ some classes::
 .. note::
 
     If writing this boiler plate is a turn off, consider using
-    `attrs <https://www.attrs.org>`_ or
-    `NamedTuple <https://docs.python.org/3/library/typing.html#typing.NamedTuple>`_
-    in conjunction with this library::
+    `attrs <https://www.attrs.org>`_ in conjunction with this library as well::
 
         import attr
 
@@ -55,18 +53,6 @@ some classes::
             name: str = attr.ib()
             albums: List[Album] = attr.ib(default=attr.Factory(list))
 
-    ::
-
-        from typing import List, NamedTuple
-
-        class Album(NamedTuple):
-            id: int
-            name: str
-
-        class Artist:
-            id: int
-            name: str
-            albums: List[Album]
 
 
 With these classes defined, we can declare our schema.
@@ -143,34 +129,6 @@ down to primitives::
     #     "id": 1,
     #     "name": "Abominable Putridity"
     # }
-
-
-NamedTupleSchema
-================
-
-If you are working with ``NamedTuple`` class definitions, you may use the
-custom :class:`~marshmallow_annotations.namedtuple.NamedTupleSchema`. This
-modifies loading behavior to deserialize directly to instances of your
-defined ``NamedTuple`` class. During deserialization, default values from
-your class definition or ``None`` will be used for missing ``Optional``
-fields::
-
-    from marshmallow_annotations import NamedTupleSchema
-    from typing import NamedTuple, Optional
-
-    class Vector(NamedTuple):
-        x: int
-        y: Optional[int]
-        z: Optional[int] = 5
-
-    class VectorSchema(NamedTupleSchema):
-        class Meta:
-            target = Vector
-
-    schema = VectorSchema()
-    schema.load({'x': 1})
-
-    # Vector(x=1, y=None, z=5)
 
 
 *************

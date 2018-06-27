@@ -5,7 +5,7 @@ Change Log
 Version 2.x.x (201x-xx-xx)
 --------------------------
 
-* Optional, specialized handling for typing.NamedTuple
+* Specialized extension handling for typing.NamedTuple
 
 
 Version 2.0.0 (2018-05-02)

@@ -60,4 +60,5 @@ Content
    quickstart
    customizing
    api
+   extensions
    changelog
