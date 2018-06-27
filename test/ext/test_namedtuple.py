@@ -14,7 +14,6 @@ def test_instance_conversion(registry_):
         class Meta:
             registry = registry_
             target = SomeTuple
-            dump_default_fields = False
 
     s = SomeTupleSchema()
     result = s.load({'a': 1, 'b': 2, 'c': 3})
@@ -29,7 +28,6 @@ def test_missing_values(registry_):
         class Meta:
             registry = registry_
             target = SomeTuple
-            dump_default_fields = False
 
     s = SomeTupleSchema()
     result = s.load({'a': 1})
@@ -39,22 +37,22 @@ def test_missing_values(registry_):
     assert result.data == expected
 
 
-def test_missing_not_overrides(registry_):
+def test_dump_default_fields(registry_):
     class SomeTupleSchema(NamedTupleSchema):
         class Meta:
             registry = registry_
             target = SomeTuple
-            dump_default_fields = False
+            dump_default_fields = True
 
     s = SomeTupleSchema()
-    result = s.load({'a': 1, 'c': None})
+    result = s.dump(SomeTuple(a=1, b=None, c=5))
 
-    expected = SomeTuple(a=1, b=None, c=None)
+    expected = {'a': 1, 'b': None, 'c': 5}
     assert not result.errors
     assert result.data == expected
 
 
-def test_missing_required(registry_):
+def test_no_dump_default_fields(registry_):
     class SomeTupleSchema(NamedTupleSchema):
         class Meta:
             registry = registry_
@@ -62,36 +60,13 @@ def test_missing_required(registry_):
             dump_default_fields = False
 
     s = SomeTupleSchema()
-    result = s.load({})
+    result1 = s.dump(SomeTuple(a=1, b=None, c=5))
+    result2 = s.dump(SomeTuple(a=1, b=5, c=None))
 
-    assert result.errors
+    expected1 = {'a': 1}
+    assert not result1.errors
+    assert result1.data == expected1
 
-
-def test_remove_none_serialization(registry_):
-    class SomeTupleSchema(NamedTupleSchema):
-        class Meta:
-            registry = registry_
-            target = SomeTuple
-            dump_default_fields = False
-
-    s = SomeTupleSchema()
-    result = s.dump(SomeTuple(a=1, b=None, c=None))
-
-    expected = {'a': 1, 'c': None}
-    assert not result.errors
-    assert result.data == expected
-
-
-def test_remove_default_serialize(registry_):
-    class SomeTupleSchema(NamedTupleSchema):
-        class Meta:
-            registry = registry_
-            target = SomeTuple
-            dump_default_fields = False
-
-    s = SomeTupleSchema()
-    result = s.dump(SomeTuple(a=1, b=3, c=5))
-
-    expected = {'a': 1, 'b': 3}
-    assert not result.errors
-    assert result.data == expected
+    expected2 = {'a': 1, 'b': 5, 'c': None}
+    assert not result2.errors
+    assert result2.data == expected2
