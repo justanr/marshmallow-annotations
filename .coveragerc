@@ -2,7 +2,7 @@
 branch = true
 source = marshmallow_annotations
 omit =
-        __meta__.py
+    __meta__.py
 parallel = true
 
 [paths]
