@@ -27,9 +27,7 @@ class SomeType:
 
 
 def test_autogenerates_fields(registry_):
-
     class SomeTypeThingScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
             target = SomeTypeThing
@@ -44,9 +42,7 @@ def test_autogenerates_fields(registry_):
 
 
 def test_pulls_settings_from_meta(registry_):
-
     class SomeTypeThingScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
             target = SomeTypeThing
@@ -61,7 +57,6 @@ def test_pulls_settings_from_meta(registry_):
 
 
 def test_doesnt_overwrite_explicitly_declared_fields(registry_):
-
     class SomeTypeThingScheme(AnnotationSchema):
         id = fields.String()
 
@@ -75,12 +70,10 @@ def test_doesnt_overwrite_explicitly_declared_fields(registry_):
 
 
 def test_doesnt_overwrite_explicitly_declared_fields_from_parent(registry_):
-
     class SomeTypeThingScheme(AnnotationSchema):
         id = fields.String()
 
     class SomeTypeThingSchemeJr(SomeTypeThingScheme):
-
         class Meta:
             registry = registry_
             target = SomeTypeThing
@@ -91,9 +84,7 @@ def test_doesnt_overwrite_explicitly_declared_fields_from_parent(registry_):
 
 
 def test_pulls_configuration_from_parent(registry_):
-
     class SomeTypeThingScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
 
@@ -101,7 +92,6 @@ def test_pulls_configuration_from_parent(registry_):
                 name = {"default": "it wasn't there"}
 
     class SomeTypeThingSchemeJr(SomeTypeThingScheme):
-
         class Meta:
             registry = registry_
             target = SomeTypeThing
@@ -114,9 +104,7 @@ def test_pulls_configuration_from_parent(registry_):
 
 
 def test_merges_configuration_with_parents(registry_):
-
     class SomeTypeThingScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
 
@@ -124,7 +112,6 @@ def test_merges_configuration_with_parents(registry_):
                 name = {"default": "it wasn't there"}
 
     class SomeTypeThingSchemeJr(SomeTypeThingScheme):
-
         class Meta:
             registry = registry_
 
@@ -143,15 +130,12 @@ def test_merges_configuration_with_parents(registry_):
 
 
 def test_can_use_custom_converter(registry_):
-
     class TattleConverter(BaseConverter):
-
         def convert_all(self, target, ignore=frozenset(), configs=None):  # noqa: B008
             self.called = True
             return super().convert_all(target, ignore, configs)
 
     class SomeTypeThingScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
 
@@ -165,7 +149,6 @@ def test_registers_schema_as_field_for_target_type(registry_):
     assert SomeTypeThing not in registry_
 
     class SomeTypeThingScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
             target = SomeTypeThing
@@ -176,15 +159,12 @@ def test_registers_schema_as_field_for_target_type(registry_):
 
 
 def test_uses_parent_converter_if_none_present_here(registry_):
-
     class TattleConverter(BaseConverter):
-
         def convert_all(self, target, ignore=frozenset(), configs=None):  # noqa: B008
             self.called = True
             return super().convert_all(target, ignore, configs)
 
     class SomeTypeThingScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
 
@@ -200,9 +180,7 @@ def test_uses_parent_converter_if_none_present_here(registry_):
 
 @pytest.mark.skipif(sys.version_info < (3, 6, 5), reason="Requires 3.6.5+")
 def test_forward_declaration_of_scheme_target(registry_):
-
     class SomeTypeScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
             target = SomeType
@@ -217,7 +195,6 @@ def test_forward_declaration_of_scheme_target(registry_):
 
 
 def test_builds_nested_many_field_when_typehint_is_scheme(registry_):
-
     class Album:
         name: str
 
@@ -226,7 +203,6 @@ def test_builds_nested_many_field_when_typehint_is_scheme(registry_):
         albums: t.List[Album]
 
     class AlbumScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
 
@@ -234,7 +210,6 @@ def test_builds_nested_many_field_when_typehint_is_scheme(registry_):
             register_as_scheme = True
 
     class ArtistScheme(AnnotationSchema):
-
         class Meta:
             registry = registry_
 
@@ -248,9 +223,7 @@ def test_builds_nested_many_field_when_typehint_is_scheme(registry_):
 
 
 def test_excludes_fields_declared_in_exclude(registry_):
-
     class SomeTypeThingScheme(AnnotationSchema):
-
         class Meta:
 
             registry = registry_

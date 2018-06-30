@@ -4,10 +4,7 @@ from marshmallow import Schema, fields
 
 import pytest
 from marshmallow_annotations.exceptions import AnnotationConversionError
-from marshmallow_annotations.registry import (
-    DefaultTypeRegistry,
-    field_factory,
-)
+from marshmallow_annotations.registry import DefaultTypeRegistry, field_factory
 
 
 def test_unrecognized_type_raises_error():
@@ -27,7 +24,6 @@ def test_can_register_type_to_field_factory():
 
 
 def test_can_register_scheme_for_type():
-
     class SomeTypeScheme(Schema):
         pass
 

@@ -57,7 +57,6 @@ def test_ignores_fields_passed_to_it_in_convert_all(registry_):
 
 
 def test_ignores_classvar_when_generating_fields(registry_):
-
     class SomeOtherType(SomeType):
         frob: typing.ClassVar[int] = 0
 
