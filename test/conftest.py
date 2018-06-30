@@ -23,7 +23,6 @@ def registry_():
 
 @pytest.fixture
 def scheme():
-
     class ConverterTestScheme(Schema):
         id = fields.Integer()
         name = fields.String()

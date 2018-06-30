@@ -61,7 +61,6 @@ class AnnotationSchemaOpts(SchemaOpts):
             self.registry = source.registry
 
     def _gather_field_configs(self, schema, meta):
-
         def merge_field_configs(opts):
             field_configs = getattr(opts, "field_configs", self.__sentinel)
 
@@ -91,7 +90,6 @@ class AnnotationSchemaOpts(SchemaOpts):
 
 
 class AnnotationSchemaMeta(SchemaMeta):
-
     @classmethod
     def get_declared_fields(mcls, klass, cls_fields, inherited_fields, dict_cls):
         fields = super().get_declared_fields(
@@ -127,6 +125,7 @@ class AnnotationSchema(Schema, metaclass=AnnotationSchemaMeta):
                 register_as_scheme = True
 
     """
+
     OPTIONS_CLASS_TYPE = AnnotationSchemaOpts
 
     @classmethod

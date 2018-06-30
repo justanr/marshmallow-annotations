@@ -1,29 +1,29 @@
 from setuptools import setup, find_packages
 
-with open('README.rst') as fh:
+with open("README.rst") as fh:
     long_description = fh.read()
 
 setup(
-    name='marshmallow-annotations',
-    author='Alec Nikolas Reiter',
-    author_email='alecreiter@gmail.com',
-    version='2.0.0',
-    packages=find_packages('src', exclude=['test']),
-    package_dir={'': 'src'},
-    package_data={'': ['LICENSE', 'README.rst', 'CHANGELOG']},
+    name="marshmallow-annotations",
+    author="Alec Nikolas Reiter",
+    author_email="alecreiter@gmail.com",
+    version="2.0.0",
+    packages=find_packages("src", exclude=["test"]),
+    package_dir={"": "src"},
+    package_data={"": ["LICENSE", "README.rst", "CHANGELOG"]},
     include_package_data=True,
-    description='Marrying marshmallow and annotations',
+    description="Marrying marshmallow and annotations",
     long_description=long_description,
-    install_requires=['marshmallow>=2.0.0,<3.0.0'],
-    license='MIT',
+    install_requires=["marshmallow>=2.0.0,<3.0.0"],
+    license="MIT",
     zip_safe=False,
-    url='https://github.com/justanr/marshmallow-annotations',
-    keywords=['annotations', 'marshmallow'],
+    url="https://github.com/justanr/marshmallow-annotations",
+    keywords=["annotations", "marshmallow"],
     classifiers=[
-        'Topic :: Utilities',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: Implementation :: CPython'
-    ]
+        "Topic :: Utilities",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: Implementation :: CPython",
+    ],
 )
