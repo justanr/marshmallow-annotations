@@ -19,10 +19,10 @@ def _is_optional(typehint):
     # only supports single type optionals/unions
     # as for the implementation... look, don't ask me
     return (
-        hasattr(typehint, '__origin__') and
-        typehint.__origin__ is Union and
-        len(typehint.__args__) == 2 and
-        NoneType in typehint.__args__
+        hasattr(typehint, "__origin__")
+        and typehint.__origin__ is Union
+        and len(typehint.__args__) == 2
+        and NoneType in typehint.__args__
     )
 
 
@@ -50,9 +50,7 @@ class BaseConverter(AbstractConverter):
         self.registry = registry
 
     def convert(
-        self,
-        typehint: type,
-        opts: ConfigOptions = None
+        self, typehint: type, opts: ConfigOptions = None
     ) -> marshmallow.fields.FieldABC:
         opts = opts if opts is not None else {}
         return self._field_from_typehint(typehint, opts)
@@ -65,7 +63,7 @@ class BaseConverter(AbstractConverter):
     ) -> GeneratedFields:
         configs = configs if configs is not None else {}
         for k, default in self._get_field_defaults(target).items():
-            configs[k] = {'missing': default, **configs.get(k, {})}
+            configs[k] = {"missing": default, **configs.get(k, {})}
         return {
             k: self.convert(v, configs.get(k, {}))
             for k, v in self._get_type_hints(target).items()
@@ -112,7 +110,7 @@ class BaseConverter(AbstractConverter):
 
     def _get_field_defaults(self, item):
         """Retrieve default values if item is a namedtuple."""
-        if hasattr(item, '_field_defaults'):
+        if hasattr(item, "_field_defaults"):
             return item._field_defaults
         else:
             return {}

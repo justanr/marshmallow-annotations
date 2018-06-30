@@ -11,9 +11,10 @@ class NamedTupleSchemaOpts(AnnotationSchemaOpts):
 
     - dump_default_fields
     """
+
     def __init__(self, meta, *args, **kwargs):
         super().__init__(meta, *args, **kwargs)
-        self.dump_default_fields = getattr(meta, 'dump_default_fields', True)
+        self.dump_default_fields = getattr(meta, "dump_default_fields", True)
 
 
 class NamedTupleSchema(AnnotationSchema):
@@ -21,6 +22,7 @@ class NamedTupleSchema(AnnotationSchema):
     Derived class for creating typing.NamedTuple schema with automatic
     post-load conversion to namedtuple instances.
     """
+
     OPTIONS_CLASS_TYPE = NamedTupleSchemaOpts
 
     @marshmallow.post_load
@@ -35,7 +37,4 @@ class NamedTupleSchema(AnnotationSchema):
             return data
         else:
             default_values = self.opts.converter._get_field_defaults(self.opts.target)
-            return {
-                k: v for k, v in data.items() if
-                v != default_values.get(k)
-            }
+            return {k: v for k, v in data.items() if v != default_values.get(k)}

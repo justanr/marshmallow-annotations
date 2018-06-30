@@ -85,16 +85,16 @@ def test_defaults_missing(registry_):
     converter = BaseConverter(registry=registry_)
     generated_fields = converter.convert_all(SomeTuple)
 
-    assert generated_fields['id'].missing == missing
-    assert generated_fields['items'].missing == 0
-    assert generated_fields['value'].missing is None
+    assert generated_fields["id"].missing == missing
+    assert generated_fields["items"].missing == 0
+    assert generated_fields["value"].missing is None
 
 
 def test_override_missing(registry_):
     converter = BaseConverter(registry=registry_)
-    named_options = {'value': {'missing': 3}}
+    named_options = {"value": {"missing": 3}}
     generated_fields = converter.convert_all(SomeTuple, configs=named_options)
 
-    assert generated_fields['id'].missing == missing
-    assert generated_fields['items'].missing == 0
-    assert generated_fields['value'].missing == 3
+    assert generated_fields["id"].missing == missing
+    assert generated_fields["items"].missing == 0
+    assert generated_fields["value"].missing == 3
