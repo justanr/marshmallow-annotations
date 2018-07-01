@@ -2,7 +2,19 @@
 
 import marshmallow
 
-from marshmallow_annotations.scheme import AnnotationSchema, AnnotationSchemaOpts
+from marshmallow_annotations.scheme import (
+    AnnotationSchema,
+    AnnotationSchemaOpts,
+    BaseConverter,
+)
+
+
+__all__ = ("NamedTupleConverter", "NamedTupleSchemaOpts", "NamedTupleSchema")
+
+
+class NamedTupleConverter(BaseConverter):
+    def _get_field_defaults(self, item):
+        return getattr(item, "_field_defaults", {})
 
 
 class NamedTupleSchemaOpts(AnnotationSchemaOpts):
@@ -24,6 +36,9 @@ class NamedTupleSchema(AnnotationSchema):
     """
 
     OPTIONS_CLASS_TYPE = NamedTupleSchemaOpts
+
+    class Meta:
+        converter_factory = NamedTupleConverter
 
     @marshmallow.post_load
     def make_namedtuple(self, data):

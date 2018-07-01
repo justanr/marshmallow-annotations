@@ -1,18 +1,17 @@
-.. _extensions:
+.. _namedtuple:
 
-##########
-Extensions
-##########
-
-Specialized extensions are provided for specific use cases.
-
-
-*****************
+#################
 typing.NamedTuple
-*****************
+#################
 
-If you are working with :class:`typing.NamedTuple` definitions, you may use :class:`~marshmallow_annotations.ext.namedtuple.NamedTupleSchema`
-to generate your schema. This modifies loading behavior to deserialize
+If you are working with :class:`typing.NamedTuple` definitions, you may use the extension :class:`~marshmallow_annotations.ext.namedtuple.NamedTupleSchema`
+to generate your schema.
+
+*******************
+NamedTuple Type API
+*******************
+
+This extension modifies loading behavior to deserialize
 directly to instances of your defined :class:`~typing.NamedTuple`::
 
     from marshmallow_annotations import NamedTupleSchema
@@ -39,7 +38,7 @@ directly to instances of your defined :class:`~typing.NamedTuple`::
 
 Additionally, the ``Meta`` class provides you with the option flag
 ``dump_default_args`` to control whether attribute values matching defaults
-should be dumped or ignored::
+should be dumped or ignored; by default, matches are dumped::
 
     class VectorSchemaDropDefaults(NamedTupleSchema):
         class Meta:
@@ -51,10 +50,16 @@ should be dumped or ignored::
 
     # {'x': 1}
 
+********************
+NamedTuple Converter
+********************
 
-NamedTuple API
-==============
+.. autoclass:: marshmallow_annotations.ext.namedtuple.NamedTupleConverter
 
-..autoclass:: marshmallow_annotations.ext.namedtuple.NamedTupleSchema
+*****************
+NamedTuple Schema
+*****************
 
-..autoclass:: marshmallow_annotations.ext.namedtuple.NamedTupleSchemaOpts
+.. autoclass:: marshmallow_annotations.ext.namedtuple.NamedTupleSchema
+
+.. autoclass:: marshmallow_annotations.ext.namedtuple.NamedTupleSchemaOpts

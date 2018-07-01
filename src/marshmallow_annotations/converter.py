@@ -26,6 +26,12 @@ def _is_optional(typehint):
     )
 
 
+def _extract_optional(typehint):
+    """Given Optional[X] return X."""
+    optional_types = [t for t in typehint.__args__ if t is not NoneType]
+    return optional_types[0]
+
+
 def _is_class_var(typehint):
     try:
         return isinstance(typehint, _ClassVar)
@@ -87,7 +93,7 @@ class BaseConverter(AbstractConverter):
             allow_none = True
             required = False
             missing = None
-            [typehint] = [t for t in typehint.__args__ if t is not NoneType]
+            typehint = _extract_optional(typehint)
 
         # set this after optional check
         subtypes = getattr(typehint, "__args__", ())
@@ -109,8 +115,5 @@ class BaseConverter(AbstractConverter):
         return hints
 
     def _get_field_defaults(self, item):
-        """Retrieve default values if item is a namedtuple."""
-        if hasattr(item, "_field_defaults"):
-            return item._field_defaults
-        else:
-            return {}
+        """Read default values for fields from the target item."""
+        return {}

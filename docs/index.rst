@@ -60,5 +60,5 @@ Content
    quickstart
    customizing
    api
-   extensions
+   ext/index
    changelog

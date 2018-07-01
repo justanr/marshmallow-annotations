@@ -11,12 +11,6 @@ class SomeType:
     points: typing.List[float]
 
 
-class SomeTuple(typing.NamedTuple):
-    id: int
-    items: typing.Optional[int] = 0
-    value: typing.Optional[int] = None
-
-
 def test_convert_from_typehint(registry_):
     converter = BaseConverter(registry=registry_)
 
@@ -82,19 +76,23 @@ def test_passes_interior_options_to_list_subtype(registry_):
 
 
 def test_defaults_missing(registry_):
-    converter = BaseConverter(registry=registry_)
-    generated_fields = converter.convert_all(SomeTuple)
+    class FieldDefaultConverter(BaseConverter):
+        def _get_field_defaults(self, item):
+            return {"points": [1.0, 2.0]}
+
+    converter = FieldDefaultConverter(registry=registry_)
+    generated_fields = converter.convert_all(SomeType)
 
     assert generated_fields["id"].missing == missing
-    assert generated_fields["items"].missing == 0
-    assert generated_fields["value"].missing is None
+    assert generated_fields["name"].missing is None
+    assert generated_fields["points"].missing == [1.0, 2.0]
 
 
 def test_override_missing(registry_):
     converter = BaseConverter(registry=registry_)
-    named_options = {"value": {"missing": 3}}
-    generated_fields = converter.convert_all(SomeTuple, configs=named_options)
+    named_options = {"points": {"missing": list}, "name": {"missing": "a"}}
+    generated_fields = converter.convert_all(SomeType, configs=named_options)
 
     assert generated_fields["id"].missing == missing
-    assert generated_fields["items"].missing == 0
-    assert generated_fields["value"].missing == 3
+    assert generated_fields["name"].missing == "a"
+    assert generated_fields["points"].missing == list
