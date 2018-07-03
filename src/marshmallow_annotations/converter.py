@@ -1,7 +1,7 @@
 from typing import _ClassVar  # type: ignore
 from typing import AbstractSet, Union, get_type_hints
 
-from marshmallow import fields
+import marshmallow
 
 from .base import (
     AbstractConverter,
@@ -13,17 +13,23 @@ from .base import (
 from .registry import registry
 
 NoneType = type(None)
-_UNION_TYPE = type(Union)
 
 
 def _is_optional(typehint):
     # only supports single type optionals/unions
     # as for the implementation... look, don't ask me
     return (
-        _UNION_TYPE in type(typehint).__mro__  # noqa
-        and len(typehint.__args__) == 2  # noqa
-        and typehint.__args__[1] is NoneType  # noqa
+        hasattr(typehint, "__origin__")
+        and typehint.__origin__ is Union
+        and len(typehint.__args__) == 2
+        and NoneType in typehint.__args__
     )
+
+
+def _extract_optional(typehint):
+    """Given Optional[X] return X."""
+    optional_types = [t for t in typehint.__args__ if t is not NoneType]
+    return optional_types[0]
 
 
 def _is_class_var(typehint):
@@ -49,7 +55,9 @@ class BaseConverter(AbstractConverter):
     def __init__(self, *, registry: TypeRegistry = registry) -> None:
         self.registry = registry
 
-    def convert(self, typehint: type, opts: ConfigOptions = None) -> fields.FieldABC:
+    def convert(
+        self, typehint: type, opts: ConfigOptions = None
+    ) -> marshmallow.fields.FieldABC:
         opts = opts if opts is not None else {}
         return self._field_from_typehint(typehint, opts)
 
@@ -60,6 +68,8 @@ class BaseConverter(AbstractConverter):
         configs: NamedConfigs = None,
     ) -> GeneratedFields:
         configs = configs if configs is not None else {}
+        for k, default in self._get_field_defaults(target).items():
+            configs[k] = {"missing": default, **configs.get(k, {})}
         return {
             k: self.convert(v, configs.get(k, {}))
             for k, v in self._get_type_hints(target).items()
@@ -77,11 +87,13 @@ class BaseConverter(AbstractConverter):
         # sane defaults
         allow_none = False
         required = True
+        missing = marshmallow.missing
 
         if _is_optional(typehint):
             allow_none = True
             required = False
-            typehint = typehint.__args__[0]
+            missing = None
+            typehint = _extract_optional(typehint)
 
         # set this after optional check
         subtypes = getattr(typehint, "__args__", ())
@@ -91,6 +103,7 @@ class BaseConverter(AbstractConverter):
 
         kwargs.setdefault("allow_none", allow_none)
         kwargs.setdefault("required", required)
+        kwargs.setdefault("missing", missing)
 
         field_constructor = self.registry.get(typehint)
         return field_constructor(self, subtypes, kwargs)
@@ -100,3 +113,7 @@ class BaseConverter(AbstractConverter):
         for parent in item.__mro__[::-1]:
             hints.update(get_type_hints(parent))
         return hints
+
+    def _get_field_defaults(self, item):
+        """Read default values for fields from the target item."""
+        return {}

@@ -65,7 +65,7 @@ Building Schema
 ***************
 
 The most basic scheme with ``marshmallow-annotations`` is a Meta definition
-on an :class:`~marshmallow.scheme.AnnotationSchema` subclass::
+on an :class:`~marshmallow_annotations.scheme.AnnotationSchema` subclass::
 
     from marshmallow_annotations import AnnotationSchema
 

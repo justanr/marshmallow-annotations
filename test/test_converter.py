@@ -1,6 +1,6 @@
 import typing
 
-from marshmallow import fields
+from marshmallow import fields, missing
 
 from marshmallow_annotations.converter import BaseConverter
 
@@ -73,3 +73,26 @@ def test_passes_interior_options_to_list_subtype(registry_):
     field = converter.convert(typing.List[int], opts)
 
     assert field.container.as_string
+
+
+def test_defaults_missing(registry_):
+    class FieldDefaultConverter(BaseConverter):
+        def _get_field_defaults(self, item):
+            return {"points": [1.0, 2.0]}
+
+    converter = FieldDefaultConverter(registry=registry_)
+    generated_fields = converter.convert_all(SomeType)
+
+    assert generated_fields["id"].missing == missing
+    assert generated_fields["name"].missing is None
+    assert generated_fields["points"].missing == [1.0, 2.0]
+
+
+def test_override_missing(registry_):
+    converter = BaseConverter(registry=registry_)
+    named_options = {"points": {"missing": list}, "name": {"missing": "a"}}
+    generated_fields = converter.convert_all(SomeType, configs=named_options)
+
+    assert generated_fields["id"].missing == missing
+    assert generated_fields["name"].missing == "a"
+    assert generated_fields["points"].missing == list
