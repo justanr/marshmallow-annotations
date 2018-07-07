@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("README.rst") as fh:
     long_description = fh.read()
@@ -26,4 +26,5 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: Implementation :: CPython",
     ],
+    extras_require={"attrs": ["attrs"]},
 )

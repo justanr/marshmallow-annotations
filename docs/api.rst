@@ -71,6 +71,7 @@ Converter
     :members:
 
 .. autoclass:: marshmallow_annotations.converter.BaseConverter
+    :members: _get_field_defaults, _preprocess_typehint, _postprocess_typehint
 
 
 ******
@@ -86,3 +87,11 @@ Schema
 .. autoclass:: marshmallow_annotations.scheme.AnnotationSchema
 
 .. autoclass:: marshmallow_annotations.scheme.AnnotationSchemaOpts
+
+
+**********
+Exceptions
+**********
+
+.. autoclass:: marshmallow_annotations.exceptions.MarshmallowAnnotationError
+.. autoclass:: marshmallow_annotations.exceptions.AnnotationConversionError

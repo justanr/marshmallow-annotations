@@ -28,10 +28,20 @@ class AbstractConverter(ABC):
     """
 
     @abstractmethod
-    def convert(self, typehint: type, opts: ConfigOptions = None) -> FieldABC:
+    def convert(
+        self,
+        typehint: type,
+        opts: ConfigOptions = None,
+        *,
+        field_name: str = None,
+        target: type = None
+    ) -> FieldABC:
         """
         Used to convert a type hint into a :class:`~marshmallow.base.FieldABC`
         instance.
+
+        :versionchanged: 2.2.0 Added field_name and target optional keyword
+            only arguments
         """
         pass
 
