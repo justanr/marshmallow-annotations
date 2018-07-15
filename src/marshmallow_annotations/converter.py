@@ -50,16 +50,28 @@ class BaseConverter(AbstractConverter):
     Handles parsing types for type hints and mapping those type hints into
     marshmallow field instances by way of a
     :class:`~marshmallow_annotations.base.TypeRegistry` instance.
+
+    :versionchanged: 2.1.0 Added non-public hook ``_get_field_defaults``
+
+    :versionchanged: 2.2.0 Added non-public hooks ``_preprocess_typehint``
+        and ``_postprocess_typehint``
     """
 
     def __init__(self, *, registry: TypeRegistry = registry) -> None:
         self.registry = registry
 
     def convert(
-        self, typehint: type, opts: ConfigOptions = None
+        self,
+        typehint: type,
+        opts: ConfigOptions = None,
+        *,
+        field_name: str = None,
+        target: type = None
     ) -> marshmallow.fields.FieldABC:
         opts = opts if opts is not None else {}
-        return self._field_from_typehint(typehint, opts)
+        return self._field_from_typehint(
+            typehint, opts, field_name=field_name, target=target
+        )
 
     def convert_all(
         self,
@@ -71,18 +83,20 @@ class BaseConverter(AbstractConverter):
         for k, default in self._get_field_defaults(target).items():
             configs[k] = {"missing": default, **configs.get(k, {})}
         return {
-            k: self.convert(v, configs.get(k, {}))
-            for k, v in self._get_type_hints(target).items()
-            if k not in ignore and should_include(v)
+            k: self.convert(v, configs.get(k, {}), field_name=k, target=target)
+            for k, v in self._get_type_hints(target, ignore)
         }
 
     def is_scheme(self, typehint: type) -> bool:
         constructor = self.registry.get(typehint)
         return getattr(constructor, "__is_scheme__", False)
 
-    def _field_from_typehint(self, typehint, kwargs=None):
+    def _field_from_typehint(
+        self, typehint, kwargs=None, *, field_name: str = None, target: type = None
+    ):
         # need that immutable dict in the stdlib pls
         kwargs = kwargs if kwargs is not None else {}
+        self._preprocess_typehint(typehint, kwargs, field_name, target)
 
         # sane defaults
         allow_none = False
@@ -105,15 +119,40 @@ class BaseConverter(AbstractConverter):
         kwargs.setdefault("required", required)
         kwargs.setdefault("missing", missing)
 
+        self._postprocess_typehint(typehint, kwargs, field_name, target)
         field_constructor = self.registry.get(typehint)
         return field_constructor(self, subtypes, kwargs)
 
-    def _get_type_hints(self, item):
+    def _get_type_hints(self, item, ignore):
+        """
+        Helper to gather typehints from entire MRO.
+
+        :versionchanged: 2.2.0 Push filtering of typehints into this method,
+            return type is now Iterable[Tuple[str, type]]
+        """
         hints = {}
         for parent in item.__mro__[::-1]:
             hints.update(get_type_hints(parent))
-        return hints
+        return [
+            (k, v) for (k, v) in hints.items() if k not in ignore and should_include(v)
+        ]
 
     def _get_field_defaults(self, item):
-        """Read default values for fields from the target item."""
+        """
+        Non-public hookpoint to read default values for all fields from the target
+        """
         return {}
+
+    def _preprocess_typehint(self, typehint, kwargs, field_name, target):
+        """
+        Non-public hookpoint for any preprocessing of typehint parsing
+        for a given field
+        """
+        pass
+
+    def _postprocess_typehint(self, typehint, kwargs, field_name, target):
+        """
+        Non-public hookpoint for any postprocessing of typehint parsing
+        for a given field.
+        """
+        pass
