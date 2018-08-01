@@ -6,8 +6,16 @@ from uuid import UUID
 from marshmallow import fields
 from marshmallow.base import FieldABC, SchemaABC
 
+from ._compat import _get_base
 from .base import AbstractConverter, ConfigOptions, FieldFactory, TypeRegistry
 from .exceptions import AnnotationConversionError
+
+
+def _is_generic(typehint: type) -> bool:
+    # this *could* be isinstance(typehint, (Generic, _GenericAlias)) but
+    # this works out better given that __origin__ isn't likely to go away
+    # the way _GenericAlias might
+    return getattr(typehint, "__origin__", None) is not None
 
 
 def field_factory(field: FieldABC) -> FieldFactory:
@@ -86,7 +94,9 @@ class DefaultTypeRegistry(TypeRegistry):
         }.items()
     }
 
+    # py36, py37 compatibility, register both out of praticality
     _registry[List] = _list_converter
+    _registry[list] = _list_converter
 
     def __init__(self, registry: Dict[type, FieldFactory] = None) -> None:
         if registry is None:
@@ -99,6 +109,9 @@ class DefaultTypeRegistry(TypeRegistry):
 
     def get(self, target: type) -> FieldFactory:
         converter = self._registry.get(target)
+        if converter is None and _is_generic(target):
+            converter = self._registry.get(_get_base(target))
+
         if converter is None:
             raise AnnotationConversionError(f"No field factory found for {target!r}")
         return converter
