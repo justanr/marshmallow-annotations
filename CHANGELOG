@@ -1,11 +1,16 @@
 Change Log
 ==========
 
+Version 2.3.0 (2018-08-05)
+--------------------------
+
+* Python 3.7 support
+
+
 Version 2.2.0 (2018-07-14)
 --------------------------
 
 * Specialized extension handling for attrs based classes
-
 
 
 Version 2.1.0 (2018-07-01)
