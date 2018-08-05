@@ -1,8 +1,8 @@
-from typing import _ClassVar  # type: ignore
 from typing import AbstractSet, Union, get_type_hints
 
 import marshmallow
 
+from ._compat import _get_base, _is_class_var
 from .base import (
     AbstractConverter,
     ConfigOptions,
@@ -30,13 +30,6 @@ def _extract_optional(typehint):
     """Given Optional[X] return X."""
     optional_types = [t for t in typehint.__args__ if t is not NoneType]
     return optional_types[0]
-
-
-def _is_class_var(typehint):
-    try:
-        return isinstance(typehint, _ClassVar)
-    except TypeError:  # pragma: no branch
-        return False
 
 
 def should_include(typehint):
@@ -113,7 +106,7 @@ class BaseConverter(AbstractConverter):
         subtypes = getattr(typehint, "__args__", ())
 
         if subtypes != ():
-            typehint = typehint.__base__
+            typehint = _get_base(typehint)
 
         kwargs.setdefault("allow_none", allow_none)
         kwargs.setdefault("required", required)
