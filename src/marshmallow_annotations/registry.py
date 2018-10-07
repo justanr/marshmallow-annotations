@@ -73,6 +73,7 @@ class DefaultTypeRegistry(TypeRegistry):
     - time -> fields.Time
     - timedelta -> fields.TimeDelta
     - UUID -> fields.UUID
+    - dict -> fields.Dict
 
     As well as a special factory for typing.List[T] that will generate either
     fields.List or fields.Nested
@@ -91,6 +92,8 @@ class DefaultTypeRegistry(TypeRegistry):
             time: fields.Time,
             timedelta: fields.TimeDelta,
             UUID: fields.UUID,
+            dict: fields.Dict,
+            Dict: fields.Dict,
         }.items()
     }
 
