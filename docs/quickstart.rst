@@ -149,6 +149,12 @@ types mapped to marshmallow fields, these fields and their mappings are:
 - :class:`~datetime.time` maps to :class:`~marshmallow.fields.Time`
 - :class:`~datetime.timedelta` maps to :class:`~marshmallow.fields.TimeDelta`
 - :class:`~uuid.UUID` maps to :class:`~marshmallow.fields.UUID`
+- :class:`dict` maps to :class:`~marshmallow.fields.Dict`
+
+
+.. note::
+
+    See below for details on the ``dict`` mapping.
 
 
 List[T]
@@ -186,6 +192,17 @@ it generates the base fieldi but will default ``required`` to False and
     that may be either an int, a float or a None::
 
         Union[int, float, None]
+
+
+Dict[TKey, TValue]
+==================
+
+``marshmallow-annotations`` does support handling automatic conversions for
+:class:`dict` mapped fields. However, ``marshmallow`` itself does not provide
+additional serialization and deserialization support for dictionary fields, so
+even if a field is mapped as ``Dict[int, string]`` the output of that field
+will be the raw input. If you require dictionary serialization, you may
+consider using a custom field.
 
 
 Forward Declaration

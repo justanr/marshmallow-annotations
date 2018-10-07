@@ -96,3 +96,13 @@ def test_override_missing(registry_):
     assert generated_fields["id"].missing == missing
     assert generated_fields["name"].missing == "a"
     assert generated_fields["points"].missing == list
+
+
+def test_can_convert_Dict_type_to_DictField(registry_):
+    class HasDictField:
+        mapping: typing.Dict[int, str]
+
+    converter = BaseConverter(registry=registry_)
+    generated_fields = converter.convert_all(HasDictField)
+
+    assert isinstance(generated_fields["mapping"], fields.Dict)
