@@ -1,4 +1,4 @@
-from typing import AbstractSet, Tuple
+from typing import AbstractSet, Tuple, Callable
 
 from dataclasses import MISSING, Field, InitVar, _FIELD_INITVAR
 from marshmallow import missing, post_load
@@ -15,6 +15,8 @@ from ..exceptions import AnnotationConversionError
 from ..scheme import AnnotationSchema, BaseConverter
 
 __all__ = ("DataclassConverter", "DataclassSchema")
+
+_DATACLASS_METADATA_KEY = "marshmallow-annotations"
 
 
 def _should_include_default(field: Field) -> bool:
@@ -33,9 +35,14 @@ def _has_default(field: Field) -> bool:
 
 
 def _initvar_converter(
-    converter: AbstractConverter, subtype: Tuple[type], opts: ConfigOptions
+    converter: BaseConverter, subtype: Tuple[type], opts: ConfigOptions
 ) -> FieldABC:
-    return converter.convert(subtype[0], opts)
+    if 'initvar-typehint' not in opts.get("metadata", {}):
+        raise ValueError("use field(metadata=initvar_typehint(<typehint)) "
+                         "or field(..., metadata={**other_metadata, **initvar_typehint(<typehint>)})")
+    real_typehint = opts["metadata"]["initvar-typehint"]
+    real_field_constructor = converter.registry.get(real_typehint)
+    return real_field_constructor(converter, real_typehint, opts)
 
 
 class DataclassConverter(BaseConverter):
@@ -46,13 +53,13 @@ class DataclassConverter(BaseConverter):
     def _get_field_defaults(self, target):
         return {
             k: v.default
-            for k, v in target.__dataclass_fields__
+            for k, v in target.__dataclass_fields__.items()
             if _should_include_default(v)
         }
 
     def _preprocess_typehint(self, typehint, kwargs, field_name, target):
         field = _get_field(target, field_name)
-
+        kwargs["metadata"] = field.metadata.get(_DATACLASS_METADATA_KEY)
         if _has_default(field):
             kwargs.setdefault("required", False)
             kwargs.setdefault("missing", missing)
@@ -75,3 +82,11 @@ class DataclassSchema(AnnotationSchema):
     @post_load
     def make_object(self, data):
         return self.opts.target(**data)
+
+
+def initvar_typehint(typehint: type):
+    return {_DATACLASS_METADATA_KEY: {"initvar-typehint": typehint}}
+
+
+def validator(validation_fn: Callable):
+    return

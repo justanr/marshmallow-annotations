@@ -1,6 +1,7 @@
 -rrequirements-cov.txt
 -rrequirements-types.txt
 black==18.6b2
+dataclasses
 flake8-bugbear==18.2.0
 flake8==3.5.0
 pytest-black==0.1.6
