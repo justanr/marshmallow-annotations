@@ -1,6 +1,7 @@
 import marshmallow as ma
 import pytest
 from marshmallow_annotations.exceptions import AnnotationConversionError
+from typing import List
 
 try:
     from marshmallow_annotations.ext.attrs import AttrsSchema
@@ -25,6 +26,8 @@ class SomeClass:
     d: int = attr.ib(default=1)
     # Include metadata
     e: str = attr.ib(default="", metadata={"hi": "world"})
+    # container of non-attrs class
+    f: List[int] = attr.ib(default=[])
 
 
 def test_properly_converts_attrs_class_to_schema(registry_):
@@ -52,7 +55,7 @@ def test_dumps_all_attributes(registry_):
     s = SomeClassSchema()
     result = s.dump(SomeClass(a=99))  # type: ignore
 
-    expected = {"a": 99, "b": 1, "c": 1, "d": 1, "e": ""}
+    expected = {"a": 99, "b": 1, "c": 1, "d": 1, "e": "", "f": []}
     assert not result.errors
     assert result.data == expected
 

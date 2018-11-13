@@ -10,6 +10,12 @@ from ..scheme import AnnotationSchema, BaseConverter
 
 __all__ = ("AttrsConverter", "AttrsSchema")
 
+__SENTINEL = object()
+
+
+def _is_attrs(target):
+    return getattr(target, "__attrs_attrs__", __SENTINEL) is not __SENTINEL
+
 
 def _get_attr_from_attrs(attrs: Iterable[Attribute], name: str) -> Attribute:
     attrs = [a for a in attrs if a.name == name]
@@ -44,7 +50,10 @@ class AttrsConverter(BaseConverter):
             if _should_include_default(a)
         }
 
-    def _preprocess_typehint(self, typehing, kwargs, field_name, target):
+    def _preprocess_typehint(self, typehint, kwargs, field_name, target):
+        if not _is_attrs(target):
+            return
+
         attr = _get_attr_from_attrs(target.__attrs_attrs__, field_name)
 
         if attr.default != NOTHING:
@@ -54,6 +63,9 @@ class AttrsConverter(BaseConverter):
             kwargs.setdefault("missing", missing)
 
     def _postprocess_typehint(self, typehint, kwargs, field_name, target):
+        if not _is_attrs(target):
+            return
+
         attr = _get_attr_from_attrs(target.__attrs_attrs__, field_name)
 
         if not attr.init:
