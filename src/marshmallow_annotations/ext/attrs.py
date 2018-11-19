@@ -61,6 +61,9 @@ class AttrsConverter(BaseConverter):
             # into __init__ -- even if the user told us otherwise
             kwargs["dump_only"] = True
 
+        if attr.metadata:
+            kwargs.update(attr.metadata)
+
     def _ensure_all_hints_are_attribs(self, target, ignore):
         # This would happen if an attrs handled class was subclassed by
         # a plain ol' python class and added more non-ignored type hinted

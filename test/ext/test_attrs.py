@@ -23,6 +23,8 @@ class SomeClass:
     c: int = attr.ib(default=1, init=False)
     # non-required, missing is 1
     d: int = attr.ib(default=1)
+    # Include metadata
+    e: str = attr.ib(default="", metadata={"hi": "world"})
 
 
 def test_properly_converts_attrs_class_to_schema(registry_):
@@ -50,7 +52,7 @@ def test_dumps_all_attributes(registry_):
     s = SomeClassSchema()
     result = s.dump(SomeClass(a=99))  # type: ignore
 
-    expected = {"a": 99, "b": 1, "c": 1, "d": 1}
+    expected = {"a": 99, "b": 1, "c": 1, "d": 1, "e": ""}
     assert not result.errors
     assert result.data == expected
 
@@ -67,3 +69,14 @@ def test_cant_convert_non_attrs_subclass(registry_):
                 target = SomeSubclass
 
     assert "x" in str(excinfo.value)
+
+
+def test_metadata_included(registry_):
+    class SomeClassSchema(AttrsSchema):
+        class Meta:
+            registry = registry_
+            target = SomeClass
+
+    s = SomeClassSchema()
+    assert s.fields["e"].metadata.keys() == {"hi"}
+    assert s.fields["e"].metadata["hi"] == "world"
