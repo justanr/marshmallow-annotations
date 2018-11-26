@@ -1,5 +1,8 @@
+from typing import List
+
 import marshmallow as ma
 import pytest
+from marshmallow_annotations import AnnotationSchema
 from marshmallow_annotations.exceptions import AnnotationConversionError
 
 try:
@@ -25,6 +28,31 @@ class SomeClass:
     d: int = attr.ib(default=1)
     # Include metadata
     e: str = attr.ib(default="", metadata={"hi": "world"})
+    # container of non-attrs class
+    f: List[int] = attr.ib(factory=list)
+
+
+@attr.s(auto_attribs=True)
+class SomeOtherClass:
+    a: int = attr.ib()
+    b: "List[SomeOtherClass]" = attr.ib()
+
+
+@attr.s(auto_attribs=True)
+class ContainerClass:
+    a: List[SomeClass] = attr.ib(factory=list)
+
+
+class NotAnAttrsClass:
+    a: int
+
+    def __init__(self, a: int) -> None:
+        self.a = a
+
+
+@attr.s(auto_attribs=True)
+class ContainsNotAttrs:
+    a: NotAnAttrsClass = attr.ib()
 
 
 def test_properly_converts_attrs_class_to_schema(registry_):
@@ -52,7 +80,7 @@ def test_dumps_all_attributes(registry_):
     s = SomeClassSchema()
     result = s.dump(SomeClass(a=99))  # type: ignore
 
-    expected = {"a": 99, "b": 1, "c": 1, "d": 1, "e": ""}
+    expected = {"a": 99, "b": 1, "c": 1, "d": 1, "e": "", "f": []}
     assert not result.errors
     assert result.data == expected
 
@@ -71,6 +99,21 @@ def test_cant_convert_non_attrs_subclass(registry_):
     assert "x" in str(excinfo.value)
 
 
+def test_can_convert_forward_references_to_self(registry_):
+    class SomeOtherClassSchema(AttrsSchema):
+        class Meta:
+            registry = registry_
+            target = SomeOtherClass
+            register_as_scheme = True
+
+    inst = SomeOtherClass(a=1, b=[SomeOtherClass(a=2, b=[])])
+    expected = {"a": 1, "b": [{"a": 2, "b": []}]}
+    result = SomeOtherClassSchema().dump(inst)
+
+    assert not result.errors
+    assert result.data == expected
+
+
 def test_metadata_included(registry_):
     class SomeClassSchema(AttrsSchema):
         class Meta:
@@ -80,3 +123,43 @@ def test_metadata_included(registry_):
     s = SomeClassSchema()
     assert s.fields["e"].metadata.keys() == {"hi"}
     assert s.fields["e"].metadata["hi"] == "world"
+
+
+def test_handles_contained_attrs_class_properly(registry_):
+    class SomeClassSchema(AttrsSchema):
+        class Meta:
+            registry = registry_
+            target = SomeClass
+            register_as_scheme = True
+
+    class ContainerClassSchema(AttrsSchema):
+        class Meta:
+            registry = registry_
+            target = ContainerClass
+
+    inst = ContainerClass(a=[SomeClass(a=99, b=1, d=1, f=[])])
+    s = ContainerClassSchema()
+    expected = {"a": [{"a": 99, "b": 1, "c": 1, "d": 1, "e": "", "f": []}]}
+    result = s.dump(inst)
+    assert not result.errors
+    assert result.data == expected
+
+
+def test_handles_contained_not_attrs_class(registry_):
+    class NotAnAttrsClassSchema(AnnotationSchema):
+        class Meta:
+            registry = registry_
+            target = NotAnAttrsClass
+            register_as_scheme = True
+
+    class ContainsNotAttrsSchema(AttrsSchema):
+        class Meta:
+            registry = registry_
+            target = ContainsNotAttrs
+
+    inst = ContainsNotAttrs(a=NotAnAttrsClass(1))
+    s = ContainsNotAttrsSchema()
+    expected = {"a": {"a": 1}}
+    result = s.dump(inst)
+    assert not result.errors
+    assert result.data == expected

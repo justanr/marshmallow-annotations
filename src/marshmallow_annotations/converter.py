@@ -22,13 +22,13 @@ def _is_optional(typehint):
         hasattr(typehint, "__origin__")
         and typehint.__origin__ is Union
         and len(typehint.__args__) == 2
-        and NoneType in typehint.__args__
+        and NoneType in typehint.__args__  # type: ignore
     )
 
 
 def _extract_optional(typehint):
     """Given Optional[X] return X."""
-    optional_types = [t for t in typehint.__args__ if t is not NoneType]
+    optional_types = [t for t in typehint.__args__ if t is not NoneType]  # type: ignore
     return optional_types[0]
 
 
