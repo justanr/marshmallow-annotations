@@ -1,6 +1,15 @@
 Change Log
 ==========
 
+Version 2.4.0 (2018-12-12)
+--------------------------
+
+* Dict field converter (see docs for details and cavaets) (#21)
+* Fixed issue with AttrsConverter that would treat non-attrs based classes
+  in containers as if they were attrs based (#25)
+* Retain metadata attached to attr.ib fields when generating schema (#26)
+
+
 Version 2.3.0 (2018-08-05)
 --------------------------
 

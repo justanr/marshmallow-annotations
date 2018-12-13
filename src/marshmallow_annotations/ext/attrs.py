@@ -26,6 +26,11 @@ def _should_include_default(attr):
     if not attr.init:
         return False
 
+    # an attrs factory cannot be copied over to a marshmallow field despite
+    # marshmallow fields being able to accept a callable there because some
+    # attrs factories accept the newly created instance as an argument
+    # which is something marshmallow doesn't support
+
     # see following issue for mypy ignore
     # https://github.com/python/mypy/issues/3060
     return attr.default != NOTHING and not isinstance(  # type: ignore
@@ -51,6 +56,12 @@ class AttrsConverter(BaseConverter):
         }
 
     def _preprocess_typehint(self, typehint, kwargs, field_name, target):
+        # while this seems contradictory to this converter, we need to
+        # ignore attrs specific actions when a container type, e.g. a List[T],
+        # contains a non-attrs manufactured type because this is recursively
+        # called during schema generation.
+        # however those types will still require an entry in the registry
+        # is handled outside this converter
         if not _is_attrs(target):
             return
 
@@ -63,6 +74,7 @@ class AttrsConverter(BaseConverter):
             kwargs.setdefault("missing", missing)
 
     def _postprocess_typehint(self, typehint, kwargs, field_name, target):
+        # see _preprocess_typehint for details
         if not _is_attrs(target):
             return
 
