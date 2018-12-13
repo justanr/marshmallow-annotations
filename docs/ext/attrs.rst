@@ -8,9 +8,9 @@ If you are using `attrs <http://attrs.org>`_, you can use the extension
 :class:`~marshmallow_annotations.ext.attrs.AttrsSchema` to generate your schema.
 
 
-************
-Installation
-************
+****************************
+attrs Extension Installation
+****************************
 
 This extension ships with ``marshmallow-annotations`` beginning in v2.2.0 and
 is available for import normally. You may specify
@@ -19,7 +19,7 @@ install attrs along side marshmallow-annotations.
 
 
 *********************
-Attrs Integration API
+attrs Integration API
 *********************
 
 This extension modifies loading behavior to deserialize directly into instances
@@ -66,6 +66,12 @@ schema generation makes:
 It is possible to override the ``missing`` value and ``required=False`` by
 changing these in the ``Meta.Fields``.
 
+
+Beginning with v2.4.0, if metadata is provided to the ``attr.ib`` by its
+``metadata`` argument, it will be propagated into the generated field. This
+metadata can be used by other projects such as
+`apispec <https://apispec.readthedocs.io/en/stable/index.html>`_ but is
+otherwise ignored by this library at this time.
 
 .. warning::
 
