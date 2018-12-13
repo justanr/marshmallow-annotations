@@ -11,3 +11,4 @@ Contributors (chronological)
 ============================
 
 - George Leslie-Waksman `@gwax <https://github.com/gwax>`_
+- Tammo Ippen `@tammoippe <https://github.com/tammoippen>`_
