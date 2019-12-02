@@ -14,7 +14,7 @@ setup(
     include_package_data=True,
     description="Marrying marshmallow and annotations",
     long_description=long_description,
-    install_requires=["marshmallow>=2.0.0,<3.0.0"],
+    install_requires=["marshmallow>=3.0.0"],
     license="MIT",
     zip_safe=False,
     url="https://github.com/justanr/marshmallow-annotations",
