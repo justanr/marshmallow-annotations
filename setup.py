@@ -7,7 +7,7 @@ setup(
     name="marshmallow-annotations",
     author="Alec Nikolas Reiter",
     author_email="alecreiter@gmail.com",
-    version="2.4.0",
+    version="2.4.1",
     packages=find_packages("src", exclude=["test"]),
     package_dir={"": "src"},
     package_data={"": ["LICENSE", "README.rst", "CHANGELOG"]},
