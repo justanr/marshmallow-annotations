@@ -117,7 +117,7 @@ class DefaultTypeRegistry(TypeRegistry):
             converter = self._registry.get(_get_base(target))
 
         if converter is None:
-            raise AnnotationConversionError(f"No field factory found for {target!r}")
+            raise AnnotationConversionError(f"No field factory found for {target!r} (forgot to register_as_scheme attribute?)")
         return converter
 
     def register_field_for_type(self, target: type, field: FieldABC) -> None:
