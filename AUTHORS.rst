@@ -12,3 +12,4 @@ Contributors (chronological)
 
 - George Leslie-Waksman `@gwax <https://github.com/gwax>`_
 - Tammo Ippen `@tammoippe <https://github.com/tammoippen>`_
+- Arsen Mamikonyan `@mamikonyana <https://github.com/mamikonyana>`_

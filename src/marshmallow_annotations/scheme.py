@@ -19,7 +19,7 @@ class AnnotationSchemaOpts(SchemaOpts):
     - converter
     """
 
-    def __init__(self, meta, schema=None):
+    def __init__(self, meta, schema=None, ordered=False):
         super().__init__(meta)
         self.__sentinel = object()
         self.field_configs: Dict[str, Dict[str, Any]] = {}
@@ -129,5 +129,5 @@ class AnnotationSchema(Schema, metaclass=AnnotationSchemaMeta):
     OPTIONS_CLASS_TYPE = AnnotationSchemaOpts
 
     @classmethod
-    def OPTIONS_CLASS(cls, meta):
-        return cls.OPTIONS_CLASS_TYPE(meta, cls)
+    def OPTIONS_CLASS(cls, meta, **kwargs):
+        return cls.OPTIONS_CLASS_TYPE(meta, cls, **kwargs)
