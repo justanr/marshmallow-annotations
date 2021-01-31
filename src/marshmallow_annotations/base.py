@@ -34,7 +34,8 @@ class AbstractConverter(ABC):
         opts: ConfigOptions = None,
         *,
         field_name: str = None,
-        target: type = None
+        target: type = None,
+        allow_thunked: bool = True
     ) -> FieldABC:
         """
         Used to convert a type hint into a :class:`~marshmallow.base.FieldABC`
@@ -51,6 +52,7 @@ class AbstractConverter(ABC):
         target: type,
         ignore: AbstractSet[str] = frozenset([]),  # noqa: B008
         configs: NamedConfigs = None,
+        allow_thunked: bool = True
     ) -> GeneratedFields:
         """
         Used to transform a type with annotations into a dictionary mapping
