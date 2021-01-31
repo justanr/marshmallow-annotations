@@ -10,6 +10,7 @@ from .base import (
     NamedConfigs,
     TypeRegistry,
 )
+from .fields import ThunkedField
 from .registry import registry
 
 NoneType = type(None)
@@ -59,11 +60,16 @@ class BaseConverter(AbstractConverter):
         opts: ConfigOptions = None,
         *,
         field_name: str = None,
-        target: type = None
+        target: type = None,
+        allow_thunked: bool = True
     ) -> marshmallow.fields.FieldABC:
         opts = opts if opts is not None else {}
         return self._field_from_typehint(
-            typehint, opts, field_name=field_name, target=target
+            typehint,
+            opts,
+            field_name=field_name,
+            target=target,
+            allow_thunked=allow_thunked,
         )
 
     def convert_all(
@@ -71,12 +77,19 @@ class BaseConverter(AbstractConverter):
         target: type,
         ignore: AbstractSet[str] = frozenset([]),  # noqa
         configs: NamedConfigs = None,
+        allow_thunked: bool = True,
     ) -> GeneratedFields:
         configs = configs if configs is not None else {}
         for k, default in self._get_field_defaults(target).items():
             configs[k] = {"missing": default, **configs.get(k, {})}
         return {
-            k: self.convert(v, configs.get(k, {}), field_name=k, target=target)
+            k: self.convert(
+                v,
+                configs.get(k, {}),
+                field_name=k,
+                target=target,
+                allow_thunked=allow_thunked,
+            )
             for k, v in self._get_type_hints(target, ignore)
         }
 
@@ -85,8 +98,19 @@ class BaseConverter(AbstractConverter):
         return getattr(constructor, "__is_scheme__", False)
 
     def _field_from_typehint(
-        self, typehint, kwargs=None, *, field_name: str = None, target: type = None
+        self,
+        typehint,
+        kwargs=None,
+        *,
+        field_name: str = None,
+        target: type = None,
+        allow_thunked: bool = True
     ):
+        if allow_thunked and not self.registry.has(typehint):
+            return ThunkedField(
+                self, typehint, kwargs, field_name=field_name, target=target
+            )
+
         # need that immutable dict in the stdlib pls
         kwargs = kwargs if kwargs is not None else {}
         self._preprocess_typehint(typehint, kwargs, field_name, target)
@@ -113,6 +137,7 @@ class BaseConverter(AbstractConverter):
         kwargs.setdefault("missing", missing)
 
         self._postprocess_typehint(typehint, kwargs, field_name, target)
+
         field_constructor = self.registry.get(typehint)
         return field_constructor(self, subtypes, kwargs)
 

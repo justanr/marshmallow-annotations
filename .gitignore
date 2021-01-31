@@ -115,6 +115,9 @@ Session.vim
 .netrwhist
 *~
 # auto-generated tag files
-tags
+tags.lock
+tags.temp
 
 # End of https://www.gitignore.io/api/python,vim
+
+*.ipynb
