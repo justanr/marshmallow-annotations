@@ -3,6 +3,17 @@ from typing import AbstractSet, Any, Callable, Dict, Optional, Tuple, Union
 
 from marshmallow.base import FieldABC, SchemaABC
 
+from .exceptions import AnnotationConversionError
+
+__all__ = (
+    "AbstractConverter",
+    "ConfigOptions",
+    "FieldFactory",
+    "GeneratedFields",
+    "NamedConfigs",
+    "TypeRegistry",
+)
+
 ConfigOptions = Optional[Dict[str, Any]]
 NamedConfigs = Optional[Dict[str, ConfigOptions]]
 GeneratedFields = Dict[str, FieldABC]
@@ -35,14 +46,22 @@ class AbstractConverter(ABC):
         *,
         field_name: str = None,
         target: type = None,
-        allow_thunked: bool = True
+        allow_thunked: bool = True,
     ) -> FieldABC:
         """
         Used to convert a type hint into a :class:`~marshmallow.base.FieldABC`
         instance.
 
+        If ``allow_thunked`` is passed as ``True`` then the converter is allowed,
+        but not required, to generate an instance of
+        :class:`~marshmallow_annotations.fields.ThunkedField` instead of the
+        field that corresponds to the type hint.
+
         :versionchanged: 2.2.0 Added field_name and target optional keyword
             only arguments
+
+        :versionchanged: 3.0.0 Added allow_thunked optional keyword only
+            argument.
         """
         pass
 
@@ -52,7 +71,7 @@ class AbstractConverter(ABC):
         target: type,
         ignore: AbstractSet[str] = frozenset([]),  # noqa: B008
         configs: NamedConfigs = None,
-        allow_thunked: bool = True
+        allow_thunked: bool = True,
     ) -> GeneratedFields:
         """
         Used to transform a type with annotations into a dictionary mapping
@@ -125,6 +144,18 @@ class TypeRegistry(ABC):
             registry.get(str)  # string field factory
             registry.get(object)  # raises AnnotationConversionError
 
+        """
+        pass
+
+    @abstractmethod
+    def get_or_thunk(self, target: type) -> FieldFactory:
+        """
+        Retrieves a field factory from the registry. If it doesn't exist,
+        this _must_ return a factory producing a
+        :class:`~marshmallow_annotations.fields.ThunkedField`::
+
+            registry.get(str)  # string field factory
+            registry.get(object)  # returns a ThunkedField factory
         """
         pass
 

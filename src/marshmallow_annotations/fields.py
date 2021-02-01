@@ -1,112 +1,148 @@
-from marshmallow.fields import Field, missing_
+from abc import ABC, abstractmethod
+from typing import Tuple
 
-from marshmallow_annotations.base import AbstractConverter, ConfigOptions
+from marshmallow.base import FieldABC
+from marshmallow.fields import missing_
+
+from marshmallow_annotations.base import AbstractConverter, ConfigOptions, TypeRegistry
+
+__all__ = ("ThunkedField",)
 
 
-class ThunkedField(Field):
-    def __init__(
-        self,
-        converter: AbstractConverter,
-        typehint: type,
-        opts: ConfigOptions = None,
-        *,
-        field_name: str = None,
-        target: type = None,
-    ) -> None:
-        # we intentionally do not call the super constructor
-        self._converter = converter
-        self._typehint = typehint
-        self._opts = opts
-        self._field_name = field_name
-        self._target = target
-        self.__inner_field = None
+class ProxyingField(FieldABC, ABC):
+    """
+    A :class:`~marshmallow.field.FieldABC` that proxies into lazily constructed,
+    contained field.
+
+    This proxy only promises that all publicly accessible members are
+    accessible and makes a best effort to proxy some well known non-public
+    members but not all.
+    """
+
+    _inner_field: FieldABC
+
+    def __init__(self, *args, **kwargs):
+        # intentionally do not call super constructor
+        self._inner_field = None
         self._parent = None
         self._name = None
 
+    @abstractmethod
+    def _make_inner_field(self) -> FieldABC:
+        raise NotImplementedError
+
     @property
-    def _inner_field(self):
-        if self.__inner_field is None:
-            self.__inner_field = self._converter.convert(
-                self._typehint,
-                self._opts,
-                field_name=self._field_name,
-                target=self._target,
-                allow_thunked=False,
-            )
+    def inner_field(self):
+        if self._inner_field is None:
+            self._inner_field = self._make_inner_field()
+            self._inner_field._add_to_schema(self.parent, self.name)
 
-            self.__inner_field._add_to_schema(self._parent, self._name)
-
-        return self.__inner_field
+        return self._inner_field
 
     def serialize(self, attr, obj, accessor=None):
-        return self._inner_field.serialize(attr, obj, accessor)
+        return self.inner_field.serialize(attr, obj, accessor)
 
     def deserialize(self, value, attr=None, data=None):
-        return self._inner_field.deserialize(value, attr, data)
+        return self.inner_field.deserialize(value, attr, data)
 
     # proxy these as well just in case someone goes poking around
     def _serialize(self, value, attr, obj):
-        return self._inner_field._serialize(self, value, attr, obj)
+        return self.inner_field._serialize(self, value, attr, obj)
 
     def _deserialize(self, value, attr, data):
-        return self._inner_field._deserialize(value, attr, data)
+        return self.inner_field._deserialize(value, attr, data)
 
-    def _inner_field_property(prop_name):
-        getter = lambda self: getattr(self._inner_field, prop_name)
-        setter = lambda self, value: setattr(self._inner_field, prop_name, value)
-        return property(getter, setter)
+    def __getattr__(self, name):
+        # without these being excluded, copying the field
+        # ends up endlessly recursing when _inner_field is accessed
+        if name == "__setstate__" or name == "__getstate__":
+            raise AttributeError(name)
 
-    default = _inner_field_property("default")
-    attribute = _inner_field_property("attribute")
-    load_from = _inner_field_property("load_from")
-    dump_to = _inner_field_property("dump_to")
-    validate = _inner_field_property("validate")
-    required = _inner_field_property("required")
-    load_only = _inner_field_property("load_only")
-    dump_only = _inner_field_property("dump_only")
-    missing = _inner_field_property("missing")
-    metadata = _inner_field_property("metadata")
+        return getattr(self.inner_field, name)
 
-    del _inner_field_property
+    def __setattr__(self, name, value):
+        # since __setattr__ fires for ALL sets of regular fields we have to
+        # allow ourselves an escape hatch to set our own fields -- this could
+        # be reduced to the known set of fields set in __init__ and everything
+        # else is passed down to the inner field :shrug:
+        if name.startswith("_"):
+            object.__setattr__(self, name, value)
+        else:
+            setattr(self.inner_field, name, value)
 
     @property
     def parent(self):
-        if self.__inner_field is None:
+        if self._inner_field is None:
             return self._parent
-        return self._inner_field.parent
+        return self.inner_field.parent
 
     @parent.setter
     def parent(self, value):
-        if self.__inner_field is None:
+        if self._inner_field is None:
             self._parent = value
-        self._inner_field.parent = value
+        self.inner_field.parent = value
 
     @property
     def name(self):
-        if self.__inner_field is None:
+        if self._inner_field is None:
             return self._name
-        return self._inner_field.name
+        return self.inner_field.name
 
     @name.setter
     def name(self, value):
-        if self.__inner_field is None:
+        if self._inner_field is None:
             self._name = value
-        self._inner_field.name = value
+        self.inner_field.name = value
 
     def __repr__(self):
-        if self._inner_field is None:
-            return f"ThunkedField(UNINITIALIZED)"
+        this_name = self.__class__.__name__
+        if self.inner_field is None:
+            return f"{this_name}(UNINITIALIZED)"
 
-        return f"ThunkedField({repr(self._inner_field)})"
+        return f"{this_name}({repr(self.inner_field)})"
 
     def get_value(self, attr, obj, accessor=None, default=missing_):
-        return self._inner_field.get_value(attr, obj, accessor, default)
+        return self.inner_field.get_value(attr, obj, accessor, default)
 
     def _validate(self, value):
-        return self._inner_field._validate(value)
+        return self.inner_field._validate(value)
 
     def fail(self, key, **kwargs):
-        return self._inner_field.fail(key, **kwargs)
+        return self.inner_field.fail(key, **kwargs)
 
     def _validate_missing(self, value):
-        return self._inner_field._validate_missing(value)
+        return self.inner_field._validate_missing(value)
+
+
+class ThunkedField(ProxyingField):
+    """
+    A :class:`~ProxyingField` that delays creating an inner field for a type
+    that did not exist in the provided
+    :class:`~marshmallow_annotations.base.TypeRegistry` at the time that it
+    was requested.
+
+    The type must exist in the provided
+    :class:`~marshmallow_annotations.base.TypeRegistry` by the time the inner
+    field is accessed, otherwise a
+    :class:`~marshmallow_annotations.exceptions.AnnotationConversionError`
+    may be thrown when it is accessed.
+    """
+
+    def __init__(
+        self,
+        registry: TypeRegistry,
+        target: type,
+        converter: AbstractConverter,
+        subtypes: Tuple[type],
+        kwargs: ConfigOptions,
+    ) -> None:
+        super().__init__()
+        self._registry = registry
+        self._target = target
+        self._converter = converter
+        self._subtypes = subtypes
+        self._kwargs = kwargs
+
+    def _make_inner_field(self):
+        field_constructor = self._registry.get(self._target)
+        return field_constructor(self._converter, self._subtypes, self._kwargs)

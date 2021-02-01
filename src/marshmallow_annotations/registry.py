@@ -9,6 +9,9 @@ from marshmallow.base import FieldABC, SchemaABC
 from ._compat import _get_base
 from .base import AbstractConverter, ConfigOptions, FieldFactory, TypeRegistry
 from .exceptions import AnnotationConversionError
+from .fields import ThunkedField
+
+__all__ = ("DefaultTypeRegistry", "field_factory", "registry", "scheme_factory")
 
 
 def _is_generic(typehint: type) -> bool:
@@ -112,12 +115,26 @@ class DefaultTypeRegistry(TypeRegistry):
         self._registry[target] = constructor
 
     def get(self, target: type) -> FieldFactory:
+        converter = self._get_internal(target)
+        if converter is None:
+            raise AnnotationConversionError(
+                f"No field factory found for {target!r} (forgot to register_as_scheme attribute?)"  # noqa
+            )
+        return converter
+
+    def get_or_thunk(self, target: type) -> FieldFactory:
+        converter = self._get_internal(target)
+        if converter is None:
+            return lambda converter, subtypes, kwargs: ThunkedField(
+                self, target, converter, subtypes, kwargs
+            )
+        return converter
+
+    def _get_internal(self, target):
         converter = self._registry.get(target)
         if converter is None and _is_generic(target):
             converter = self._registry.get(_get_base(target))
 
-        if converter is None:
-            raise AnnotationConversionError(f"No field factory found for {target!r} (forgot to register_as_scheme attribute?)")
         return converter
 
     def register_field_for_type(self, target: type, field: FieldABC) -> None:

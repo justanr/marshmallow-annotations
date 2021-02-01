@@ -95,3 +95,11 @@ Exceptions
 
 .. autoclass:: marshmallow_annotations.exceptions.MarshmallowAnnotationError
 .. autoclass:: marshmallow_annotations.exceptions.AnnotationConversionError
+
+
+******
+Fields
+******
+
+.. autoclass:: marshmallow_annotations.fields.ProxyingField
+.. autoclass:: marshmallow_annotations.fields.ThunkedField

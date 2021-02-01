@@ -31,7 +31,6 @@ def test_autogenerates_fields(registry_):
         class Meta:
             registry = registry_
             target = SomeTypeThing
-            registry = registry_
 
     scheme_fields = SomeTypeThingScheme._declared_fields
 
@@ -46,7 +45,6 @@ def test_pulls_settings_from_meta(registry_):
         class Meta:
             registry = registry_
             target = SomeTypeThing
-            registry = registry_
 
             class Fields:
                 name = {"default": "it wasn't there"}

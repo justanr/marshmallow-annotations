@@ -80,6 +80,7 @@ Content
    :maxdepth: 1
 
    quickstart
+   usage
    customizing
    api
    ext/index

@@ -10,10 +10,19 @@ from .base import (
     NamedConfigs,
     TypeRegistry,
 )
-from .fields import ThunkedField
 from .registry import registry
 
+__all__ = ("BaseConverter", "thunked", "THUNKED_MARKER")
+
+
 NoneType = type(None)
+
+THUNKED_MARKER = "__THUNKED__"
+
+
+def thunked(field_opts):
+    field_opts[THUNKED_MARKER] = True
+    return field_opts
 
 
 def _is_optional(typehint):
@@ -77,21 +86,26 @@ class BaseConverter(AbstractConverter):
         target: type,
         ignore: AbstractSet[str] = frozenset([]),  # noqa
         configs: NamedConfigs = None,
-        allow_thunked: bool = True,
     ) -> GeneratedFields:
         configs = configs if configs is not None else {}
         for k, default in self._get_field_defaults(target).items():
             configs[k] = {"missing": default, **configs.get(k, {})}
-        return {
-            k: self.convert(
-                v,
-                configs.get(k, {}),
+
+        converted = {}
+
+        for k, typehint in self._get_type_hints(target, ignore):
+            this_config = configs.get(k, {})
+            allow_thunked = this_config.pop(THUNKED_MARKER, False)
+
+            converted[k] = self.convert(
+                typehint,
+                this_config,
                 field_name=k,
                 target=target,
                 allow_thunked=allow_thunked,
             )
-            for k, v in self._get_type_hints(target, ignore)
-        }
+
+        return converted
 
     def is_scheme(self, typehint: type) -> bool:
         constructor = self.registry.get(typehint)
@@ -106,11 +120,6 @@ class BaseConverter(AbstractConverter):
         target: type = None,
         allow_thunked: bool = True
     ):
-        if allow_thunked and not self.registry.has(typehint):
-            return ThunkedField(
-                self, typehint, kwargs, field_name=field_name, target=target
-            )
-
         # need that immutable dict in the stdlib pls
         kwargs = kwargs if kwargs is not None else {}
         self._preprocess_typehint(typehint, kwargs, field_name, target)
@@ -138,7 +147,11 @@ class BaseConverter(AbstractConverter):
 
         self._postprocess_typehint(typehint, kwargs, field_name, target)
 
-        field_constructor = self.registry.get(typehint)
+        if allow_thunked:
+            field_constructor = self.registry.get_or_thunk(typehint)
+        else:
+            field_constructor = self.registry.get(typehint)
+
         return field_constructor(self, subtypes, kwargs)
 
     def _get_type_hints(self, item, ignore):

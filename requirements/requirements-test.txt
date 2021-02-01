@@ -1,2 +1,2 @@
 -rrequirements-cov.txt
-pytest==3.5.0
+pytest>=6.2.2,<7.0.0

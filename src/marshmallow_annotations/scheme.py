@@ -1,10 +1,12 @@
 from inspect import getmro
+from typing import Any, Dict
 
 from marshmallow.schema import Schema, SchemaMeta, SchemaOpts
 
 from .converter import BaseConverter
 from .registry import registry
-from typing import Dict, Any
+
+__all__ = ("AnnotationSchema", "AnnotationSchemaMeta", "AnnotationSchemaOpts")
 
 
 class AnnotationSchemaOpts(SchemaOpts):
@@ -16,7 +18,6 @@ class AnnotationSchemaOpts(SchemaOpts):
     - register_as_scheme
     - target
     - field_configs
-    - converter
     """
 
     def __init__(self, meta, schema=None):
