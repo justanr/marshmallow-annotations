@@ -114,5 +114,5 @@ class AttrsSchema(AnnotationSchema):
         converter_factory = AttrsConverter
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, **kwargs):
         return self.opts.target(**data)
