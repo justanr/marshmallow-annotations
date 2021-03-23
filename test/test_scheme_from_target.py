@@ -6,8 +6,8 @@ from uuid import UUID
 from marshmallow import fields
 
 import pytest
-from marshmallow_annotations.converter import BaseConverter
-from marshmallow_annotations.scheme import AnnotationSchema
+from marshmallow3_annotations.converter import BaseConverter
+from marshmallow3_annotations.scheme import AnnotationSchema
 
 
 class SomeTypeThing:
@@ -190,8 +190,7 @@ def test_forward_declaration_of_scheme_target(registry_):
     result = s.dump(SomeType(id=1, children=[SomeType(id=2)]))
 
     expected = {"id": 1, "children": [{"id": 2, "children": []}]}
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected
 
 
 def test_builds_nested_many_field_when_typehint_is_scheme(registry_):

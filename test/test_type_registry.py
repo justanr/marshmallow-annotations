@@ -3,8 +3,8 @@ from ipaddress import IPv4Address
 from marshmallow import Schema, fields
 
 import pytest
-from marshmallow_annotations.exceptions import AnnotationConversionError
-from marshmallow_annotations.registry import DefaultTypeRegistry, field_factory
+from marshmallow3_annotations.exceptions import AnnotationConversionError
+from marshmallow3_annotations.registry import DefaultTypeRegistry, field_factory
 
 
 def test_unrecognized_type_raises_error():

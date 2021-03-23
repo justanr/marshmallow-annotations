@@ -2,8 +2,8 @@ from marshmallow import Schema, fields
 from marshmallow.class_registry import _registry
 
 import pytest
-from marshmallow_annotations.registry import DefaultTypeRegistry
-from marshmallow_annotations.scheme import AnnotationSchema
+from marshmallow3_annotations.registry import DefaultTypeRegistry
+from marshmallow3_annotations.scheme import AnnotationSchema
 
 
 # testing the converter means creating a scheme to test with it

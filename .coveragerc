@@ -1,14 +1,14 @@
 [run]
 branch = true
-source = marshmallow_annotations
+source = marshmallow3_annotations
 omit =
     __meta__.py
 parallel = true
 
 [paths]
 source =
-   src/marshmallow_annotations/
-   .tox/*/lib/*/site-packages/marshmallow_annotations/
+   src/marshmallow3_annotations/
+   .tox/*/lib/*/site-packages/marshmallow3_annotations/
 
 [report]
 exclude_lines =

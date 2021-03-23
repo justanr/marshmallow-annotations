@@ -11,11 +11,11 @@ GeneratedFields = Dict[str, FieldABC]
 class AbstractConverter(ABC):
     """
     Converters handle gathering type hints and consulting with a
-    :class:`~marshmallow_annotations.base.TypeRegistry` in order to produce
+    :class:`~marshmallow3_annotations.base.TypeRegistry` in order to produce
     marshmallow field instances::
 
 
-        from marshmallow_annotations import BaseConverter
+        from marshmallow3_annotations import BaseConverter
 
         converter = BaseConverter(registry)
         converter.convert(int, {"required": False})
@@ -39,9 +39,6 @@ class AbstractConverter(ABC):
         """
         Used to convert a type hint into a :class:`~marshmallow.base.FieldABC`
         instance.
-
-        :versionchanged: 2.2.0 Added field_name and target optional keyword
-            only arguments
         """
         pass
 
@@ -118,7 +115,7 @@ class TypeRegistry(ABC):
         """
         Retrieves a field factory from the registry. If it doesn't exist,
         this may raise a
-        :class:`~marshmallow_annotations.exception.AnnotationConversionError`::
+        :class:`~marshmallow3_annotations.exception.AnnotationConversionError`::
 
             registry.get(str)  # string field factory
             registry.get(object)  # raises AnnotationConversionError

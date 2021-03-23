@@ -2,11 +2,11 @@ from typing import List
 
 import marshmallow as ma
 import pytest
-from marshmallow_annotations import AnnotationSchema
-from marshmallow_annotations.exceptions import AnnotationConversionError
+from marshmallow3_annotations import AnnotationSchema
+from marshmallow3_annotations.exceptions import AnnotationConversionError
 
 try:
-    from marshmallow_annotations.ext.attrs import AttrsSchema
+    from marshmallow3_annotations.ext.attrs import AttrsSchema
     import attr
 except ImportError:
     pytestmarker = pytest.skip("attrs not installed")
@@ -67,8 +67,7 @@ def test_properly_converts_attrs_class_to_schema(registry_):
 
     # mypy thinks we're missing arguments for some reason
     expected = SomeClass(a=1)  # type: ignore
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected
 
 
 def test_dumps_all_attributes(registry_):
@@ -81,8 +80,7 @@ def test_dumps_all_attributes(registry_):
     result = s.dump(SomeClass(a=99))  # type: ignore
 
     expected = {"a": 99, "b": 1, "c": 1, "d": 1, "e": "", "f": []}
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected
 
 
 def test_cant_convert_non_attrs_subclass(registry_):
@@ -110,8 +108,7 @@ def test_can_convert_forward_references_to_self(registry_):
     expected = {"a": 1, "b": [{"a": 2, "b": []}]}
     result = SomeOtherClassSchema().dump(inst)
 
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected
 
 
 def test_metadata_included(registry_):
@@ -141,8 +138,7 @@ def test_handles_contained_attrs_class_properly(registry_):
     s = ContainerClassSchema()
     expected = {"a": [{"a": 99, "b": 1, "c": 1, "d": 1, "e": "", "f": []}]}
     result = s.dump(inst)
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected
 
 
 def test_handles_contained_not_attrs_class(registry_):
@@ -161,5 +157,4 @@ def test_handles_contained_not_attrs_class(registry_):
     s = ContainsNotAttrsSchema()
     expected = {"a": {"a": 1}}
     result = s.dump(inst)
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected

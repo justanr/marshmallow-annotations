@@ -106,7 +106,7 @@ class AttrsSchema(AnnotationSchema):
     """
     Schema for handling ``attrs`` based targets, adds automatic load conversion
     into the target class and specifies the
-    :class:`~marshmallow_annotations.ext.attrs.AttrsConverter` as the converter
+    :class:`~marshmallow3_annotations.ext.attrs.AttrsConverter` as the converter
     factory.
     """
 
@@ -114,5 +114,5 @@ class AttrsSchema(AnnotationSchema):
         converter_factory = AttrsConverter
 
     @post_load
-    def make_object(self, data):
+    def make_object(self, data, many=False, partial=False):
         return self.opts.target(**data)

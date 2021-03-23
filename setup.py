@@ -1,23 +1,23 @@
 from setuptools import find_packages, setup
 
-with open("README.rst") as fh:
+with open("README.md") as fh:
     long_description = fh.read()
 
 setup(
-    name="marshmallow-annotations",
+    name="marshmallow3-annotations",
     author="Alec Nikolas Reiter",
     author_email="alecreiter@gmail.com",
-    version="2.4.1",
+    version="1.0.0",
     packages=find_packages("src", exclude=["test"]),
     package_dir={"": "src"},
-    package_data={"": ["LICENSE", "README.rst", "CHANGELOG"]},
+    package_data={"": ["LICENSE", "README.md", "CHANGELOG"]},
     include_package_data=True,
-    description="Marrying marshmallow and annotations",
+    description="Marrying marshmallow3 and annotations",
     long_description=long_description,
-    install_requires=["marshmallow>=2.0.0,<3.0.0"],
+    install_requires=["marshmallow>=3.0.0"],
     license="MIT",
     zip_safe=False,
-    url="https://github.com/justanr/marshmallow-annotations",
+    url="https://github.com/dkunitsk/marshmallow-annotations",
     keywords=["annotations", "marshmallow"],
     classifiers=[
         "Topic :: Utilities",
