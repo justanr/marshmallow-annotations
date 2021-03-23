@@ -5,14 +5,7 @@ python:
 matrix:
   include:
   - python: 3.7
-    dist: xenial  # https://github.com/travis-ci/travis-ci/issues/9815
-    sudo: true
-  - python: 3.6
-    env: TOXENV=lint
-  - python: 3.6
-    env: TOXENV=style
-  - python: 3.6
-    env: TOXENV=types
+    dist: xenial
 install:
 - pip install -r requirements/requirements-travis.txt
 script:
@@ -21,7 +14,5 @@ deploy:
   provider: pypi
   username: __token__
   password:
-    secure: PbDDDx/BiT4e3+KGuMEjITuw+eefURP7HUliKam49AQQi1fEw1gzTrgVHEUfpdnTLGJFVOauTcCMq2jarsrUdiRKLTmgvQvc52seNxiCsj+RUp1xoecZZ+iDyKy0Co2uOYhq7YzlNhmpS/I9cIk759NHE+IwY4zxdiSqb+shTwLSvCx/aIX5BMhO2tNLHRjVLQgDQsVTZhUzOnBoQHrQ5K+v00NirkgITJNVsBtj6B1v0eZ7V25O5cSE0R58CTi6fd/bu5nb/PKCXInyZYA+7VWjaB4gL5b140tFn9lFKIh8zjiR683reHLyizLlKIUTxcXTAZ0hpRZGTVXW/KJIs5FS+btrAG9ij8L8ImpiCWnke42sA+riDa2F6xwMMtNf+YmmvEOcXPaZ8y982FDa2PxTt4GOnyccOvgltdbUSv5GvylnKozPz5z+4rOwa177veEp3Td/hftVMC4wbGNHROdg+YlhUSFHgsBzgWIGH3HjzLsmwIcW8f3lkcTEbm1lrageWATBWuS9jjzKOvOZrv2iWpx2XdI59WR0QyNlT8YFSCH2ZG1Yv2Icste8m1sG2B8wHcd/XQH4UQVR2RmbzIK+a16oLPt/t6I1XwKc6vguvFVSFbcMKKlj48J6+ZsrnFPYxv9FBTwbYIBgAFnly3ZfCbwMgWX+Vk5MmEcwWoA=
+    secure: OuLtD/1kpoXMGxbwL25Oy5icGiFgnG5UYYyY4220w+IXW33vn2PlC9v0MhL60S6j17LkwNwRawYtiFlBs9XUL30YSLz4Z5WjudFkfkdqbeQIFVF/WmMW9GhgT6AFYUJFghPXSD4cQlgSc4AW5E7wX1tCIHExHrQW1E3pfX0BE/9WCi+rE+3IZvrXXexGuZpjgEngDpqb7M5sODjPqy2EBX916nElXcljQFFGbmJNR2/MQAaRcJAHvwz0aRpMs8hbibcSGvf6clRpL3X1u9W1+iouBawdUDWVYEd5UfI7i594yNIT0uWjPTYfKo60Ax2H2tbU6Zc8xZHNRfG/JkkdkLWKfx73duXy7mXUK3NhRZWEoQ3sL/nD6BjE0RXOISSX+lQbhPtYmVdXBPbLWL1hrBNjSgwmQCNz5U3Fask/RIfB55scPyCegO+DdOUvQPkL1IcDFHJHx5KdjFo7X3LjBrRJmSPynHwnln84oC+Pc4v9+iZRN+t9S50HfjecRpFPhStQK4JqEh/lhIuj4xRvKex0BhSXttuvQthq8Zs2S4lRhgr6dHj4H4uPK36EzO5WkZHK0Z3SYJc3Ap85HANZlLmQKOzWXCtf88jRvPEIZHeiaC6h3xaF969LlrakVrXxn89hCPObGKw8ZykffFmEx25wTBtK3fJ2MuPKzZthonA=
   distributions: sdist bdist_wheel
-  on:
-    branch: master
