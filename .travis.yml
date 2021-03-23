@@ -17,9 +17,6 @@ install:
 - pip install -r requirements/requirements-travis.txt
 script:
 - tox
-after_success:
-- coverage combine test
-- coveralls
 deploy:
   provider: pypi
   username: __token__
@@ -28,6 +25,4 @@ deploy:
   distributions: sdist bdist_wheel
   on:
     tags: true
-    repo: dkunitsk/marshmallow3-annotations
-    python: '3.7'
     branch: master
