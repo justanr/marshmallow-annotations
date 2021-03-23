@@ -5,7 +5,7 @@ python:
 matrix:
   include:
   - python: 3.7
-    dist: xenial
+    dist: xenial  # https://github.com/travis-ci/travis-ci/issues/9815
     sudo: true
   - python: 3.6
     env: TOXENV=lint
@@ -28,6 +28,6 @@ deploy:
   distributions: sdist bdist_wheel
   on:
     tags: true
-    repo: dkunitsk/marshmallow-annotations
+    repo: dkunitsk/marshmallow3-annotations
     python: '3.7'
     branch: master

@@ -17,7 +17,7 @@ setup(
     install_requires=["marshmallow>=3.0.0"],
     license="MIT",
     zip_safe=False,
-    url="https://github.com/dkunitsk/marshmallow-annotations",
+    url="https://github.com/dkunitsk/marshmallow3-annotations",
     keywords=["annotations", "marshmallow"],
     classifiers=[
         "Topic :: Utilities",
