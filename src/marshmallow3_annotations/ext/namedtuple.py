@@ -2,7 +2,7 @@
 
 import marshmallow
 
-from marshmallow_annotations.scheme import (
+from marshmallow3_annotations.scheme import (
     AnnotationSchema,
     AnnotationSchemaOpts,
     BaseConverter,
@@ -41,12 +41,12 @@ class NamedTupleSchema(AnnotationSchema):
         converter_factory = NamedTupleConverter
 
     @marshmallow.post_load
-    def make_namedtuple(self, data):
+    def make_namedtuple(self, data, **kwargs):
         """Post load, deserialize to target namedtuple class."""
         return self.opts.target(**data)
 
     @marshmallow.post_dump
-    def remove_optional(self, data):
+    def remove_optional(self, data, **kwargs):
         """Post dump, strip default fields from serialized output."""
         if self.opts.dump_default_fields:
             return data

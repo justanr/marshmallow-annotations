@@ -1,6 +1,6 @@
 import typing
 
-from marshmallow_annotations.ext.namedtuple import NamedTupleSchema
+from marshmallow3_annotations.ext.namedtuple import NamedTupleSchema
 
 
 class SomeTuple(typing.NamedTuple):
@@ -19,8 +19,7 @@ def test_instance_conversion(registry_):
     result = s.load({"a": 1, "b": 2, "c": 3})
 
     expected = SomeTuple(a=1, b=2, c=3)
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected
 
 
 def test_missing_values(registry_):
@@ -33,8 +32,7 @@ def test_missing_values(registry_):
     result = s.load({"a": 1})
 
     expected = SomeTuple(a=1, b=None, c=5)
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected
 
 
 def test_dump_default_fields(registry_):
@@ -48,8 +46,7 @@ def test_dump_default_fields(registry_):
     result = s.dump(SomeTuple(a=1, b=None, c=5))
 
     expected = {"a": 1, "b": None, "c": 5}
-    assert not result.errors
-    assert result.data == expected
+    assert result == expected
 
 
 def test_no_dump_default_fields(registry_):
@@ -64,9 +61,7 @@ def test_no_dump_default_fields(registry_):
     result2 = s.dump(SomeTuple(a=1, b=5, c=None))
 
     expected1 = {"a": 1}
-    assert not result1.errors
-    assert result1.data == expected1
+    assert result1 == expected1
 
     expected2 = {"a": 1, "b": 5, "c": None}
-    assert not result2.errors
-    assert result2.data == expected2
+    assert result2 == expected2

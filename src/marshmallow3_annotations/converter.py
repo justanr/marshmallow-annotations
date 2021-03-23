@@ -38,16 +38,11 @@ def should_include(typehint):
 
 class BaseConverter(AbstractConverter):
     """
-    Default implementation of :class:`~marshmallow_annotations.base.AbstractConverter`.
+    Default implementation of :class:`~marshmallow3_annotations.base.AbstractConverter`.
 
     Handles parsing types for type hints and mapping those type hints into
     marshmallow field instances by way of a
-    :class:`~marshmallow_annotations.base.TypeRegistry` instance.
-
-    :versionchanged: 2.1.0 Added non-public hook ``_get_field_defaults``
-
-    :versionchanged: 2.2.0 Added non-public hooks ``_preprocess_typehint``
-        and ``_postprocess_typehint``
+    :class:`~marshmallow3_annotations.base.TypeRegistry` instance.
     """
 
     def __init__(self, *, registry: TypeRegistry = registry) -> None:
@@ -119,9 +114,6 @@ class BaseConverter(AbstractConverter):
     def _get_type_hints(self, item, ignore):
         """
         Helper to gather typehints from entire MRO.
-
-        :versionchanged: 2.2.0 Push filtering of typehints into this method,
-            return type is now Iterable[Tuple[str, type]]
         """
         hints = {}
         for parent in item.__mro__[::-1]:

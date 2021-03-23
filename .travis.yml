@@ -1,20 +1,18 @@
 language: python
 sudo: false
 python:
-  - '3.6'
+- '3.6'
 matrix:
   include:
-    # see the following issue on why 3.7 is weirdo
-    # https://github.com/travis-ci/travis-ci/issues/9815
-    - python: 3.7
-      dist: xenial
-      sudo: true
-    - python: 3.6
-      env: TOXENV=lint
-    - python: 3.6
-      env: TOXENV=style
-    - python: 3.6
-      env: TOXENV=types
+  - python: 3.7
+    dist: xenial  # https://github.com/travis-ci/travis-ci/issues/9815
+    sudo: true
+  - python: 3.6
+    env: TOXENV=lint
+  - python: 3.6
+    env: TOXENV=style
+  - python: 3.6
+    env: TOXENV=types
 install:
 - pip install -r requirements/requirements-travis.txt
 script:
@@ -24,12 +22,12 @@ after_success:
 - coveralls
 deploy:
   provider: pypi
-  user: justanr
+  username: __token__
+  password:
+    secure: PbDDDx/BiT4e3+KGuMEjITuw+eefURP7HUliKam49AQQi1fEw1gzTrgVHEUfpdnTLGJFVOauTcCMq2jarsrUdiRKLTmgvQvc52seNxiCsj+RUp1xoecZZ+iDyKy0Co2uOYhq7YzlNhmpS/I9cIk759NHE+IwY4zxdiSqb+shTwLSvCx/aIX5BMhO2tNLHRjVLQgDQsVTZhUzOnBoQHrQ5K+v00NirkgITJNVsBtj6B1v0eZ7V25O5cSE0R58CTi6fd/bu5nb/PKCXInyZYA+7VWjaB4gL5b140tFn9lFKIh8zjiR683reHLyizLlKIUTxcXTAZ0hpRZGTVXW/KJIs5FS+btrAG9ij8L8ImpiCWnke42sA+riDa2F6xwMMtNf+YmmvEOcXPaZ8y982FDa2PxTt4GOnyccOvgltdbUSv5GvylnKozPz5z+4rOwa177veEp3Td/hftVMC4wbGNHROdg+YlhUSFHgsBzgWIGH3HjzLsmwIcW8f3lkcTEbm1lrageWATBWuS9jjzKOvOZrv2iWpx2XdI59WR0QyNlT8YFSCH2ZG1Yv2Icste8m1sG2B8wHcd/XQH4UQVR2RmbzIK+a16oLPt/t6I1XwKc6vguvFVSFbcMKKlj48J6+ZsrnFPYxv9FBTwbYIBgAFnly3ZfCbwMgWX+Vk5MmEcwWoA=
   distributions: sdist bdist_wheel
   on:
     tags: true
-    repo: justanr/marshmallow-annotations
+    repo: dkunitsk/marshmallow3-annotations
     python: '3.7'
     branch: master
-  password:
-    secure: QXg3Bdx2fA97mRpChdBomGdm4PC9ftQcNstUIhjADE+wDj8vzHxWOCzXKSeBRKLleP7o35T7ArpGtU/lDORGUdbmwCSJWtYq3jnHLNj0XggUwyDfXaJai61dDBcD+8H4rJN6L19RVIRRRoZBEgAhR5mII/Qc9xi1wcRULWjquyGdGtUsJprM17IvjSnYYq+i7E3L/tK1MBfFxrhuaHHtc7ql77le7Te2RSJf+iSdTW+Y1TiiPta9qQvo6SenvoZ8RwVDWzvBYrz+Va8cZPlb7M1l3uAb1uluqx4m9iI4Kw9sMbL79iLQS/Wr8XfUpqISjQNuMpNQdcxzoUX0VwOgHzbygXbXZIYPufc6Qeg33dSy2HDK502N3MYJ/g43A1FS3DhunW4JscNhnKFpi01tVkPQ8+EVCTuqFRGEJjRk9BNwaC7z3s4TeeFotbN5rZ3Ns0wdNC5C+0wqOH+saQEaSKvKRLa8JdbwoJr8TzDatf3szAqgrylTKVzoq0cO8uc10Cl9ljLZArNHnj3x7vu2NKeaGC07tlvUmc+5psbhEjC2gFp6p1sbrE2zDCeHJmeT9HHJV2OtMZ0n+kcFfBP8eE4qaOGs4dFsXvZ2dg4dqCqd+Vc8U6eVOCxQ0j1IOpN2x2+3zMufnUdiGd8pEdkAjQK/bgMz1Fr12/eqQQo/VzA=

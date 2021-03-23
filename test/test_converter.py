@@ -2,7 +2,7 @@ import typing
 
 from marshmallow import fields, missing
 
-from marshmallow_annotations.converter import BaseConverter
+from marshmallow3_annotations.converter import BaseConverter
 
 
 class SomeType:
@@ -37,7 +37,7 @@ def test_convert_all_generates_schema_fields_from_type(registry_):
     assert isinstance(generated_fields["id"], fields.Integer)
     assert isinstance(generated_fields["name"], fields.String)
     assert isinstance(generated_fields["points"], fields.List)
-    assert isinstance(generated_fields["points"].container, fields.Float)
+    assert isinstance(generated_fields["points"].inner, fields.Float)
 
 
 def test_convert_all_generates_field_options_from_named_configs(registry_):
@@ -72,30 +72,30 @@ def test_passes_interior_options_to_list_subtype(registry_):
     opts = {"_interior": {"as_string": True}}
     field = converter.convert(typing.List[int], opts)
 
-    assert field.container.as_string
+    assert field.inner.as_string
 
 
 def test_defaults_missing(registry_):
     class FieldDefaultConverter(BaseConverter):
         def _get_field_defaults(self, item):
-            return {"points": [1.0, 2.0]}
+            return {"name": "panda"}
 
     converter = FieldDefaultConverter(registry=registry_)
     generated_fields = converter.convert_all(SomeType)
 
     assert generated_fields["id"].missing == missing
-    assert generated_fields["name"].missing is None
-    assert generated_fields["points"].missing == [1.0, 2.0]
+    assert generated_fields["name"].missing == "panda"
+    assert generated_fields["points"].missing == missing
 
 
 def test_override_missing(registry_):
     converter = BaseConverter(registry=registry_)
-    named_options = {"points": {"missing": list}, "name": {"missing": "a"}}
+    named_options = {"name": {"missing": "a"}}
     generated_fields = converter.convert_all(SomeType, configs=named_options)
 
     assert generated_fields["id"].missing == missing
     assert generated_fields["name"].missing == "a"
-    assert generated_fields["points"].missing == list
+    assert generated_fields["points"].missing == missing
 
 
 def test_can_convert_Dict_type_to_DictField(registry_):
