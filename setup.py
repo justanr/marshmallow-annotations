@@ -5,8 +5,6 @@ with open("README.md") as fh:
 
 setup(
     name="marshmallow3-annotations",
-    author="Alec Nikolas Reiter",
-    author_email="alecreiter@gmail.com",
     version="1.0.0",
     packages=find_packages("src", exclude=["test"]),
     package_dir={"": "src"},
