@@ -2,4 +2,4 @@
   uses: pypa/gh-action-pypi-publish@release/v1
   with:
     user: __token__
-    password: "PBTxH+pi0GNztu9yX/AiaQuqNgB/lrgcR1LLGkwJggtNKJaL5Fxb6dT8T4BWPDr+A2UdtL8VrlsW5Mn5ci/R+qmtUU6BRCK7mX22W21wKXjSrKxTIQE+kqe2cE/U8DCTVRdwrrtJRG30I7SmuJujpNvAncoDsRepOceC6hCSd0l8r6nPfxc0eGulv5hzaum7soC6hdAqV6dU5ksRYeMJHupscTeonJJAGJeJW9xT+F2+i203ez5+b+tF4QWAoxgpABD+y0evX1D781qnupyQOf/wzVigKjMiOZlCAZx0O6YJY3bEw9IUG6c67gq7fI+N6+ZPtpK+VDsYZHbdxUNTDZiTG/OE4fYn8TjEi21cqGejwMRG9xSUjSe0AhZXlKad3kj2eE/EP1WvLf0rQbep4TcS3NHmg+1uKXsvvLwNXH2V4u8SSxO1PU1835gffDNMul3Nm14o9d3mGIB61qxjeVLu9zpupJ1NgFGF7Hak3PjbRxxCVOgwpPL4ZXKZk7K2rcmn8kkFYM4CZ9gasIWz4PqPu1qQ4NmuxqgEryBQakSoBbC9KUj46dH2LB+iN4/lPb5+LSGz1fG6zyVL6AWkEtizUU/QkxImzU/+m+c76AQ9vDVqOQS3oZ5dPjjalpSIaEEJsluLbcBJYlX/BQwCOBLLYQoor+0fagyezh+mnr4="
+    password: ${{ secrets.PYPI_API_TOKEN }}
