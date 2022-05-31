@@ -1,6 +1,6 @@
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 from uuid import UUID
 
 from marshmallow import fields
@@ -57,12 +57,20 @@ def _list_converter(
     return fields.List(converter.convert(subtypes[0], sub_opts), **opts)
 
 
+def _dict_converter(
+    converter: AbstractConverter, subtypes: Tuple[type], opts: ConfigOptions
+) -> FieldABC:
+    sub_opts = opts.pop("_interior", {})
+    return fields.Dict(keys=converter.convert(subtypes[0], sub_opts),
+                       values=converter.convert(subtypes[1], sub_opts), **opts)
+
+
 class DefaultTypeRegistry(TypeRegistry):
     """
     Default implementation of :class:`~marshmallow3_annotations.base.TypeRegistry`.
 
     Provides default mappings of:
-
+    - Any -> fields.Raw (https://marshmallow.readthedocs.io/en/stable/api_reference.html#marshmallow.fields.Raw)
     - bool -> fields.Boolean
     - date -> fields.Date
     - datetime -> fields.DateTime
@@ -73,16 +81,15 @@ class DefaultTypeRegistry(TypeRegistry):
     - time -> fields.Time
     - timedelta -> fields.TimeDelta
     - UUID -> fields.UUID
-    - dict -> fields.Dict
-    - typing.Dict -> fields.Dict
 
     As well as a special factory for typing.List[T] that will generate either
-    fields.List or fields.Nested
+    fields.List or fields.Nested and a special factory fot dict and Dict which converts nested subtypes
     """
 
     _registry = {
         k: field_factory(v)
         for k, v in {
+            Any: fields.Raw,
             bool: fields.Boolean,
             date: fields.Date,
             datetime: fields.DateTime,
@@ -93,14 +100,15 @@ class DefaultTypeRegistry(TypeRegistry):
             time: fields.Time,
             timedelta: fields.TimeDelta,
             UUID: fields.UUID,
-            dict: fields.Dict,
-            Dict: fields.Dict,
         }.items()
     }
 
     # py36, py37 compatibility, register both out of praticality
     _registry[List] = _list_converter
     _registry[list] = _list_converter
+
+    _registry[Dict] = _dict_converter
+    _registry[dict] = _dict_converter
 
     def __init__(self, registry: Dict[type, FieldFactory] = None) -> None:
         if registry is None:
